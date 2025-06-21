@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Project Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Warm Neutral (Stone) with Teal Accent -->
+    <!-- Application Structure Plan: A single-page, task-oriented wizard with collapsible sections. The structure guides the user from high-level global settings to detailed backend and frontend configurations, culminating in a dynamic module editor. This top-down approach simplifies the complex configuration process, making it manageable and intuitive. Each section can be toggled, allowing users to focus on one area at a time while still seeing the overall scope. This design directly implements the UI plan from the source analysis, prioritizing user flow and clarity over mirroring the separate script files. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: All script variables (PROJECT_NAME, DB_HOST, etc.) -> Goal: User Configuration -> Viz/Presentation Method: HTML form elements (<input>, <select>, <input type="checkbox">). -> Interaction: Standard form input. -> Justification: Provides a direct, universally understood method for data entry. -> Library/Method: Vanilla HTML.
+        - Report Info: Dynamic module/feature lists from `createModuleConfigSystem.sh`. -> Goal: Allow dynamic creation of complex objects. -> Viz/Presentation Method: A dynamically generated list of input groups styled to look like a table. -> Interaction: Users click "Add" buttons to append new items and "Remove" buttons to delete them. JS handles DOM manipulation. -> Justification: This is the most complex interaction and requires a custom solution. A dynamic list of forms is more flexible than a rigid table and is ideal for this use case. -> Library/Method: Vanilla JS and Tailwind-styled HTML.
+        - Report Info: The overall generation workflow. -> Goal: Provide user with a mental model. -> Viz/Presentation Method: A non-interactive, multi-step process indicator built with styled HTML divs. -> Interaction: None. -> Justification: Visually communicates the simple 3-step process (Configure -> Generate -> Download) without needing complex graphics libraries. -> Library/Method: HTML/Tailwind CSS.
+        - Report Info: No quantitative data suitable for traditional charting exists in the source report. -> Goal: N/A -> Viz/Presentation Method: N/A. No charts are used. -> Library/Method: Chart.js is not needed.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .form-input,
+      .form-select {
+        @apply w-full px-4 py-2 bg-stone-50 border border-stone-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors duration-200;
+      }
+      .form-label {
+        @apply block text-sm font-medium text-slate-700 mb-1;
+      }
+      .card {
+        @apply bg-white p-6 rounded-xl shadow-md border border-stone-200;
+      }
+      .collapsible-header {
+        @apply cursor-pointer flex justify-between items-center;
+      }
+      .chevron-icon {
+        @apply transition-transform duration-300;
+      }
+      .chevron-icon.rotate-180 {
+        transform: rotate(180deg);
+      }
+      .btn {
+        @apply px-4 py-2 rounded-lg font-semibold shadow-sm transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-offset-2;
+      }
+      .btn-primary {
+        @apply bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-500;
+      }
+      .btn-secondary {
+        @apply bg-stone-200 text-slate-800 hover:bg-stone-300 focus:ring-stone-400;
+      }
+      .btn-danger {
+        @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-400;
+      }
+      #json-output-modal {
+        @apply fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 transition-opacity duration-300;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 350px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-stone-100 text-slate-800 font-sans">
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+      <header class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-teal-800">Interactive Project Generator</h1>
+        <p class="mt-2 text-lg text-slate-600">
+          Visually configure your full-stack application and generate a project template on-demand.
+        </p>
+      </header>
+
+      <div class="mb-12">
+        <h2 class="text-xl font-semibold text-center mb-4">Your Generation Workflow</h2>
+        <div class="flex items-center justify-center space-x-2 sm:space-x-4">
+          <div class="flex items-center text-teal-600">
+            <div
+              class="rounded-full bg-teal-600 text-white w-8 h-8 flex items-center justify-center font-bold text-lg"
+            >
+              1
+            </div>
+            <span class="ml-2 font-semibold">Configure</span>
+          </div>
+          <div class="flex-1 h-0.5 bg-stone-300"></div>
+          <div class="flex items-center text-slate-500">
+            <div
+              class="rounded-full bg-stone-400 text-white w-8 h-8 flex items-center justify-center font-bold text-lg"
+            >
+              2
+            </div>
+            <span class="ml-2 font-semibold">Generate</span>
+          </div>
+          <div class="flex-1 h-0.5 bg-stone-300"></div>
+          <div class="flex items-center text-slate-500">
+            <div
+              class="rounded-full bg-stone-400 text-white w-8 h-8 flex items-center justify-center font-bold text-lg"
+            >
+              3
+            </div>
+            <span class="ml-2 font-semibold">Download</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="card">
+          <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b pb-3">
+            Global Project Settings
+          </h2>
+          <p class="text-slate-600 mb-6">
+            Start by defining the overall name for your project. This will be used as the root
+            directory name for the generated ZIP file.
+          </p>
+          <div>
+            <label for="global-projectName" class="form-label">Overall Project Name</label>
+            <input
+              type="text"
+              id="global-projectName"
+              class="form-input"
+              placeholder="my-awesome-app"
+            />
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="backend-collapsible" class="collapsible-header">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="backend-include"
+                class="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-4"
+              />
+              <h2 class="text-2xl font-bold text-slate-800">Backend Setup (FastAPI & Docker)</h2>
+            </div>
+            <span class="chevron-icon">
+              <svg
+                class="w-6 h-6 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </span>
+          </div>
+          <div id="backend-content" class="pt-6 mt-4 border-t border-stone-200 hidden">
+            <p class="text-slate-600 mb-6">
+              Configure the Python backend. This section includes settings for project metadata,
+              database credentials, and application behavior, all of which will be used to generate
+              the `.env` and `docker-compose.yml` files.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="backend-projectName" class="form-label">Backend Project Name</label>
+                <input
+                  type="text"
+                  id="backend-projectName"
+                  class="form-input"
+                  placeholder="backend-api"
+                />
+              </div>
+              <div>
+                <label for="backend-projectVersion" class="form-label">Project Version</label>
+                <input
+                  type="text"
+                  id="backend-projectVersion"
+                  class="form-input"
+                  placeholder="0.1.0"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label for="backend-projectDescription" class="form-label"
+                  >Project Description</label
+                >
+                <textarea
+                  id="backend-projectDescription"
+                  class="form-input"
+                  rows="2"
+                  placeholder="A robust backend service."
+                ></textarea>
+              </div>
+              <h3 class="md:col-span-2 text-lg font-semibold text-slate-700 mt-2 border-b pb-2">
+                Database Configuration
+              </h3>
+              <div>
+                <label for="backend-dbHost" class="form-label">DB Host</label>
+                <input type="text" id="backend-dbHost" class="form-input" value="postgres" />
+              </div>
+              <div>
+                <label for="backend-dbPort" class="form-label">DB Port</label>
+                <input type="number" id="backend-dbPort" class="form-input" value="5432" />
+              </div>
+              <div>
+                <label for="backend-dbName" class="form-label">DB Name</label>
+                <input type="text" id="backend-dbName" class="form-input" placeholder="app_db" />
+              </div>
+              <div>
+                <label for="backend-dbUser" class="form-label">DB User</label>
+                <input type="text" id="backend-dbUser" class="form-input" placeholder="db_user" />
+              </div>
+              <div class="md:col-span-2">
+                <label for="backend-dbPassword" class="form-label">DB Password</label>
+                <input
+                  type="password"
+                  id="backend-dbPassword"
+                  class="form-input"
+                  placeholder="Leave blank to generate"
+                />
+              </div>
+              <h3 class="md:col-span-2 text-lg font-semibold text-slate-700 mt-2 border-b pb-2">
+                PgAdmin Configuration
+              </h3>
+              <div>
+                <label for="backend-pgAdminEmail" class="form-label">PgAdmin Email</label>
+                <input
+                  type="email"
+                  id="backend-pgAdminEmail"
+                  class="form-input"
+                  placeholder="admin@example.com"
+                />
+              </div>
+              <div>
+                <label for="backend-pgAdminPassword" class="form-label">PgAdmin Password</label>
+                <input
+                  type="password"
+                  id="backend-pgAdminPassword"
+                  class="form-input"
+                  placeholder="Leave blank to generate"
+                />
+              </div>
+              <h3 class="md:col-span-2 text-lg font-semibold text-slate-700 mt-2 border-b pb-2">
+                Application Behavior
+              </h3>
+              <div>
+                <label for="backend-debug" class="form-label">Debug Mode</label>
+                <select id="backend-debug" class="form-select">
+                  <option value="true">Enabled</option>
+                  <option value="false" selected>Disabled</option>
+                </select>
+              </div>
+              <div>
+                <label for="backend-logLevel" class="form-label">Log Level</label>
+                <select id="backend-logLevel" class="form-select">
+                  <option>DEBUG</option>
+                  <option selected>INFO</option>
+                  <option>WARNING</option>
+                  <option>ERROR</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="frontend-collapsible" class="collapsible-header">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="frontend-include"
+                class="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-4"
+              />
+              <h2 class="text-2xl font-bold text-slate-800">Frontend Setup (React & Vite)</h2>
+            </div>
+            <span class="chevron-icon">
+              <svg
+                class="w-6 h-6 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </span>
+          </div>
+          <div id="frontend-content" class="pt-6 mt-4 border-t border-stone-200 hidden">
+            <p class="text-slate-600 mb-6">
+              Set up your React frontend application. Choose a project name and select optional
+              features like example pages, pre-commit hooks, and the advanced module configuration
+              system.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="frontend-projectName" class="form-label">Frontend Project Name</label>
+                <input
+                  type="text"
+                  id="frontend-projectName"
+                  class="form-input"
+                  placeholder="frontend-ui"
+                />
+              </div>
+              <div class="md:col-span-2 space-y-3 mt-4">
+                <div class="flex items-center">
+                  <input
+                    id="frontend-includeExamplePages"
+                    type="checkbox"
+                    class="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <label for="frontend-includeExamplePages" class="ml-3 text-sm text-slate-700"
+                    >Include Example Pages & Components</label
+                  >
+                </div>
+                <div class="flex items-center">
+                  <input
+                    id="frontend-includeHusky"
+                    type="checkbox"
+                    class="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <label for="frontend-includeHusky" class="ml-3 text-sm text-slate-700"
+                    >Include Husky Pre-commit Hooks</label
+                  >
+                </div>
+              </div>
+
+              <div class="md:col-span-2 mt-4 pt-4 border-t">
+                <div class="flex items-center mb-4">
+                  <input
+                    id="frontend-moduleSystem-include"
+                    type="checkbox"
+                    class="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <label
+                    for="frontend-moduleSystem-include"
+                    class="ml-3 text-sm font-semibold text-slate-800"
+                    >Include Advanced Module & Feature System</label
+                  >
+                </div>
+                <div id="module-system-editor" class="hidden space-y-6">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-700">Modules</h3>
+                    <p class="text-sm text-slate-500 mb-4">
+                      Define application modules with permissions.
+                    </p>
+                    <div id="modules-list" class="space-y-3"></div>
+                    <button id="add-module-btn" class="btn btn-secondary mt-4 text-sm">
+                      + Add Module
+                    </button>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-700">Feature Flags</h3>
+                    <p class="text-sm text-slate-500 mb-4">
+                      Define boolean feature flags to toggle functionality.
+                    </p>
+                    <div id="features-list" class="space-y-3"></div>
+                    <button id="add-feature-btn" class="btn btn-secondary mt-4 text-sm">
+                      + Add Feature
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center pt-6">
+          <p class="text-sm text-slate-500 mb-4">
+            <strong>Note:</strong> To run the generated project locally, you need Git, Docker, and
+            Node.js installed.
+          </p>
+          <button id="generate-btn" class="btn btn-primary btn-lg text-xl w-full md:w-auto">
+            Generate & Download
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <div id="json-output-modal" class="hidden opacity-0">
+      <div
+        class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-w-3xl max-h-[80vh] flex flex-col"
+      >
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <h2 class="text-2xl font-bold text-slate-800">Generated Configuration</h2>
+          <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800">&times;</button>
+        </div>
+        <p class="text-slate-600 mb-4 text-sm">
+          This is the final JSON configuration object that would be sent to the backend API at
+          `/api/generate` to create your project files. You can copy this for your records.
+        </p>
+        <div class="relative flex-1">
+          <pre
+            id="json-output"
+            class="bg-slate-900 text-green-300 p-4 rounded-lg text-sm overflow-auto h-full w-full"
+          ></pre>
+          <button id="copy-json-btn" class="absolute top-2 right-2 btn btn-secondary text-xs">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const config = {
+          global: {
+            projectName: '',
+          },
+          backend: {
+            include: false,
+            projectName: 'backend',
+            projectDescription: 'A robust backend service.',
+            projectVersion: '0.1.0',
+            dbHost: 'postgres',
+            dbPort: 5432,
+            dbName: 'app_db',
+            dbUser: 'db_user',
+            dbPassword: '',
+            pgAdminEmail: 'admin@example.com',
+            pgAdminPassword: '',
+            debug: false,
+            logLevel: 'INFO',
+          },
+          frontend: {
+            include: false,
+            projectName: 'frontend',
+            includeExamplePages: false,
+            includeHusky: false,
+            moduleSystem: {
+              include: false,
+              modules: [],
+              features: [],
+            },
+          },
+        };
+
+        const ui = {
+          global: {
+            projectName: document.getElementById('global-projectName'),
+          },
+          backend: {
+            include: document.getElementById('backend-include'),
+            collapsible: document.getElementById('backend-collapsible'),
+            content: document.getElementById('backend-content'),
+            chevron: document.querySelector('#backend-collapsible .chevron-icon'),
+            projectName: document.getElementById('backend-projectName'),
+            projectDescription: document.getElementById('backend-projectDescription'),
+            projectVersion: document.getElementById('backend-projectVersion'),
+            dbHost: document.getElementById('backend-dbHost'),
+            dbPort: document.getElementById('backend-dbPort'),
+            dbName: document.getElementById('backend-dbName'),
+            dbUser: document.getElementById('backend-dbUser'),
+            dbPassword: document.getElementById('backend-dbPassword'),
+            pgAdminEmail: document.getElementById('backend-pgAdminEmail'),
+            pgAdminPassword: document.getElementById('backend-pgAdminPassword'),
+            debug: document.getElementById('backend-debug'),
+            logLevel: document.getElementById('backend-logLevel'),
+          },
+          frontend: {
+            include: document.getElementById('frontend-include'),
+            collapsible: document.getElementById('frontend-collapsible'),
+            content: document.getElementById('frontend-content'),
+            chevron: document.querySelector('#frontend-collapsible .chevron-icon'),
+            projectName: document.getElementById('frontend-projectName'),
+            includeExamplePages: document.getElementById('frontend-includeExamplePages'),
+            includeHusky: document.getElementById('frontend-includeHusky'),
+            moduleSystem: {
+              include: document.getElementById('frontend-moduleSystem-include'),
+              editor: document.getElementById('module-system-editor'),
+              modulesList: document.getElementById('modules-list'),
+              addModuleBtn: document.getElementById('add-module-btn'),
+              featuresList: document.getElementById('features-list'),
+              addFeatureBtn: document.getElementById('add-feature-btn'),
+            },
+          },
+          generateBtn: document.getElementById('generate-btn'),
+          modal: {
+            container: document.getElementById('json-output-modal'),
+            closeBtn: document.getElementById('close-modal-btn'),
+            copyBtn: document.getElementById('copy-json-btn'),
+            jsonOutput: document.getElementById('json-output'),
+          },
+        };
+
+        const updateConfig = (path, value) => {
+          let current = config;
+          const keys = path.split('.');
+          for (let i = 0; i < keys.length - 1; i++) {
+            current = current[keys[i]];
+          }
+          current[keys[keys.length - 1]] = value;
+        };
+
+        const handleInputChange = (e, path, isCheckbox = false, isNumber = false) => {
+          let value = isCheckbox ? e.target.checked : e.target.value;
+          if (isNumber) value = parseInt(value, 10);
+          if (path.endsWith('debug')) value = value === 'true';
+          updateConfig(path, value);
+        };
+
+        const toggleCollapsible = (content, chevron) => {
+          const isHidden = content.classList.contains('hidden');
+          content.classList.toggle('hidden', !isHidden);
+          chevron.classList.toggle('rotate-180', isHidden);
+        };
+
+        const setupCollapsible = (collapsible, content, chevron, includeCheckbox) => {
+          collapsible.addEventListener('click', (e) => {
+            if (e.target.type !== 'checkbox') {
+              toggleCollapsible(content, chevron);
+            }
+          });
+          includeCheckbox.addEventListener('change', () => {
+            content.classList.toggle('hidden', !includeCheckbox.checked);
+            if (includeCheckbox.checked && content.classList.contains('hidden')) {
+              chevron.classList.add('rotate-180');
+            } else if (!includeCheckbox.checked) {
+              chevron.classList.remove('rotate-180');
+            }
+          });
+        };
+
+        const setupListeners = () => {
+          ui.global.projectName.addEventListener('input', (e) =>
+            handleInputChange(e, 'global.projectName'),
+          );
+
+          ui.backend.include.addEventListener('change', (e) =>
+            handleInputChange(e, 'backend.include', true),
+          );
+          setupCollapsible(
+            ui.backend.collapsible,
+            ui.backend.content,
+            ui.backend.chevron,
+            ui.backend.include,
+          );
+          ui.backend.projectName.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.projectName'),
+          );
+          ui.backend.projectDescription.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.projectDescription'),
+          );
+          ui.backend.projectVersion.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.projectVersion'),
+          );
+          ui.backend.dbHost.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.dbHost'),
+          );
+          ui.backend.dbPort.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.dbPort', false, true),
+          );
+          ui.backend.dbName.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.dbName'),
+          );
+          ui.backend.dbUser.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.dbUser'),
+          );
+          ui.backend.dbPassword.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.dbPassword'),
+          );
+          ui.backend.pgAdminEmail.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.pgAdminEmail'),
+          );
+          ui.backend.pgAdminPassword.addEventListener('input', (e) =>
+            handleInputChange(e, 'backend.pgAdminPassword'),
+          );
+          ui.backend.debug.addEventListener('change', (e) => handleInputChange(e, 'backend.debug'));
+          ui.backend.logLevel.addEventListener('change', (e) =>
+            handleInputChange(e, 'backend.logLevel'),
+          );
+
+          ui.frontend.include.addEventListener('change', (e) =>
+            handleInputChange(e, 'frontend.include', true),
+          );
+          setupCollapsible(
+            ui.frontend.collapsible,
+            ui.frontend.content,
+            ui.frontend.chevron,
+            ui.frontend.include,
+          );
+          ui.frontend.projectName.addEventListener('input', (e) =>
+            handleInputChange(e, 'frontend.projectName'),
+          );
+          ui.frontend.includeExamplePages.addEventListener('change', (e) =>
+            handleInputChange(e, 'frontend.includeExamplePages', true),
+          );
+          ui.frontend.includeHusky.addEventListener('change', (e) =>
+            handleInputChange(e, 'frontend.includeHusky', true),
+          );
+
+          ui.frontend.moduleSystem.include.addEventListener('change', (e) => {
+            handleInputChange(e, 'frontend.moduleSystem.include', true);
+            ui.frontend.moduleSystem.editor.classList.toggle('hidden', !e.target.checked);
+          });
+
+          ui.frontend.moduleSystem.addModuleBtn.addEventListener('click', () => addModule());
+          ui.frontend.moduleSystem.addFeatureBtn.addEventListener('click', () => addFeature());
+
+          ui.generateBtn.addEventListener('click', showGenerationModal);
+          ui.modal.closeBtn.addEventListener('click', hideGenerationModal);
+          ui.modal.copyBtn.addEventListener('click', copyJsonToClipboard);
+        };
+
+        const createModuleRow = (module, index) => {
+          const id = `module-${index}`;
+          const div = document.createElement('div');
+          div.className = 'grid grid-cols-1 sm:grid-cols-7 gap-2 items-center';
+          div.innerHTML = `
+                    <div class="sm:col-span-2">
+                        <label for="${id}-id" class="hidden">Module ID</label>
+                        <input type="text" id="${id}-id" placeholder="Module ID (e.g., dashboard)" value="${module.id}" data-path="frontend.moduleSystem.modules.${index}.id" class="form-input text-sm">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="${id}-name" class="hidden">Module Name</label>
+                        <input type="text" id="${id}-name" placeholder="Module Name (e.g., User Dashboard)" value="${module.name}" data-path="frontend.moduleSystem.modules.${index}.name" class="form-input text-sm">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="${id}-permissions" class="hidden">Permissions</label>
+                        <input type="text" id="${id}-permissions" placeholder="Permissions (comma-separated)" value="${module.permissions}" data-path="frontend.moduleSystem.modules.${index}.permissions" class="form-input text-sm">
+                    </div>
+                    <button data-index="${index}" class="btn btn-danger btn-sm justify-self-end sm:justify-self-center">X</button>
+                `;
+          div.querySelector('button').addEventListener('click', () => removeModule(index));
+          div.querySelectorAll('input').forEach((input) => {
+            input.addEventListener('input', (e) => {
+              config.frontend.moduleSystem.modules[index][e.target.dataset.path.split('.').pop()] =
+                e.target.value;
+            });
+          });
+          return div;
+        };
+
+        const createFeatureRow = (feature, index) => {
+          const id = `feature-${index}`;
+          const div = document.createElement('div');
+          div.className = 'grid grid-cols-1 sm:grid-cols-7 gap-2 items-center';
+          div.innerHTML = `
+                    <div class="sm:col-span-6">
+                        <label for="${id}-id" class="hidden">Feature Flag ID</label>
+                        <input type="text" id="${id}-id" placeholder="Feature Flag (e.g., enableAnalytics)" value="${feature.id}" data-path="frontend.moduleSystem.features.${index}.id" class="form-input text-sm">
+                    </div>
+                    <button data-index="${index}" class="btn btn-danger btn-sm justify-self-end sm:justify-self-center">X</button>
+                `;
+          div.querySelector('button').addEventListener('click', () => removeFeature(index));
+          div.querySelector('input').addEventListener('input', (e) => {
+            config.frontend.moduleSystem.features[index].id = e.target.value;
+          });
+          return div;
+        };
+
+        const renderLists = () => {
+          ui.frontend.moduleSystem.modulesList.innerHTML = '';
+          config.frontend.moduleSystem.modules.forEach((mod, i) => {
+            ui.frontend.moduleSystem.modulesList.appendChild(createModuleRow(mod, i));
+          });
+          ui.frontend.moduleSystem.featuresList.innerHTML = '';
+          config.frontend.moduleSystem.features.forEach((feat, i) => {
+            ui.frontend.moduleSystem.featuresList.appendChild(createFeatureRow(feat, i));
+          });
+        };
+
+        const addModule = () => {
+          config.frontend.moduleSystem.modules.push({ id: '', name: '', permissions: '' });
+          renderLists();
+        };
+
+        const removeModule = (index) => {
+          config.frontend.moduleSystem.modules.splice(index, 1);
+          renderLists();
+        };
+
+        const addFeature = () => {
+          config.frontend.moduleSystem.features.push({ id: '' });
+          renderLists();
+        };
+
+        const removeFeature = (index) => {
+          config.frontend.moduleSystem.features.splice(index, 1);
+          renderLists();
+        };
+
+        const showGenerationModal = () => {
+          const configToDisplay = JSON.parse(JSON.stringify(config));
+          if (!configToDisplay.backend.include) delete configToDisplay.backend;
+          if (!configToDisplay.frontend.include) delete configToDisplay.frontend;
+          if (configToDisplay.frontend && !configToDisplay.frontend.moduleSystem.include)
+            delete configToDisplay.frontend.moduleSystem;
+
+          ui.modal.jsonOutput.textContent = JSON.stringify(configToDisplay, null, 2);
+          ui.modal.container.classList.remove('hidden');
+          setTimeout(() => ui.modal.container.classList.remove('opacity-0'), 10);
+        };
+
+        const hideGenerationModal = () => {
+          ui.modal.container.classList.add('opacity-0');
+          setTimeout(() => ui.modal.container.classList.add('hidden'), 300);
+        };
+
+        const copyJsonToClipboard = () => {
+          const textToCopy = ui.modal.jsonOutput.textContent;
+          const tempTextArea = document.createElement('textarea');
+          tempTextArea.value = textToCopy;
+          document.body.appendChild(tempTextArea);
+          tempTextArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempTextArea);
+
+          const originalText = ui.modal.copyBtn.textContent;
+          ui.modal.copyBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            ui.modal.copyBtn.textContent = originalText;
+          }, 2000);
+        };
+
+        setupListeners();
+      });
+    </script>
+  </body>
+</html>
