@@ -51,6 +51,15 @@ const BackendStep = ({ nextStep, prevStep, handleChange, config }) => {
       </div>
 
       <div className='mb-6'>
+        <textarea
+          value={config.backend.projectDescription}
+          onChange={handleChange('backend.projectDescription')}
+          placeholder='Enter backend description'
+          className='w-full p-3 mt-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'
+        />
+      </div>
+
+      <div className='mb-6'>
         <label
           htmlFor='database-select'
           className='block text-xl font-bold mb-2 text-gray-700 dark:text-gray-200'
