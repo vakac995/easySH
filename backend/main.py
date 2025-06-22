@@ -127,10 +127,11 @@ app = FastAPI(
 )
 
 # --- Constants ---
-CORS_METHODS = "GET, POST, PUT, DELETE, OPTIONS"
+# CORS_METHODS = "GET, POST, PUT, DELETE, OPTIONS"  <- This is no longer needed.
 
 # --- Simple CORS Solution ---
-# Since Railway overrides CORS headers, let's try a basic approach
+# Centralizing CORS configuration in the middleware is the standard practice.
+# This avoids conflicts with hosting platform proxies like Railway.
 
 # Add the production frontend URL to the list of allowed origins
 # This will allow the frontend hosted on GitHub Pages to communicate with the backend.
@@ -146,6 +147,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Expose Content-Disposition so the browser can access the filename for download.
+    expose_headers=["Content-Disposition"],
 )
 
 
@@ -247,14 +250,11 @@ async def generate_project(config: MasterConfig):
             )
 
     # Rewind buffer to the beginning
-    zip_buffer.seek(0)  # Set headers for file download and CORS
+    zip_buffer.seek(0)
     zip_filename = f"{config.global_config.projectName}.zip"
     headers = {
-        "Content-Disposition": f'attachment; filename="{zip_filename}"',
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": CORS_METHODS,
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Expose-Headers": "*",
+        "Content-Disposition": f'attachment; filename="{zip_filename}"'
+        # All other CORS headers are now handled by the middleware.
     }
 
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
@@ -264,13 +264,9 @@ async def generate_project(config: MasterConfig):
 @app.get("/", tags=["Health Check"])
 def read_root():
     """A simple health check endpoint."""
+    # CORS headers are handled by the middleware.
     return JSONResponse(
-        content={"status": "ok", "message": "Project Generation API is running."},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": CORS_METHODS,
-            "Access-Control-Allow-Headers": "*",
-        },
+        content={"status": "ok", "message": "Project Generation API is running."}
     )
 
 
