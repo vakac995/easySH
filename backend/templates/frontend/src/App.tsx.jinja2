@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConfigProvider } from '@/providers/ConfigProvider';
 import { Layout } from '@/components/Layout';
-import { Home } from '@/pages/Home';
+import { Home } from '@/pages/Home';{% if config.frontend.includeExamplePages %}
 import { About } from '@/pages/About';
-import { Contact } from '@/pages/Contact';
+import { Contact } from '@/pages/Contact';{% endif %}
 
 // Example user data - replace with your auth system
 const mockUser = {
@@ -15,12 +15,11 @@ const mockUser = {
 function App() {
   return (
     <ConfigProvider environment={import.meta.env.MODE} user={mockUser}>
-      <BrowserRouter>
-        <Routes>
+      <BrowserRouter>        <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+            <Route index element={<Home />} />{% if config.frontend.includeExamplePages %}
             <Route path="about" element={<About />} />
-            <Route path="contact" element={<Contact />} />
+            <Route path="contact" element={<Contact />} />{% endif %}
           </Route>
         </Routes>
       </BrowserRouter>

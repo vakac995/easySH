@@ -1,4 +1,5 @@
 
+{% if config.frontend.includeExamplePages %}
 export function About() {
   return (
     <div>
@@ -6,3 +7,6 @@ export function About() {
     </div>
   );
 }
+{% else %}
+// About page is disabled. Enable "Include Example Pages" in configuration to use this file.
+{% endif %}

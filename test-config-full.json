@@ -1,0 +1,31 @@
+{
+  "global": {
+    "projectName": "TestProjectFull"
+  },
+  "backend": {
+    "include": true,
+    "projectName": "backend",
+    "projectDescription": "Full Test Backend Service",
+    "projectVersion": "2.0.0",
+    "dbHost": "db-server",
+    "dbPort": 5432,
+    "dbName": "full_db",
+    "dbUser": "full_user",
+    "dbPassword": "full_pass",
+    "pgAdminEmail": "admin@full.com",
+    "pgAdminPassword": "admin456",
+    "debug": true,
+    "logLevel": "DEBUG"
+  },
+  "frontend": {
+    "include": true,
+    "projectName": "frontend",
+    "includeExamplePages": true,
+    "includeHusky": true,
+    "moduleSystem": {
+      "include": false,
+      "modules": [],
+      "features": []
+    }
+  }
+}

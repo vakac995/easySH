@@ -8,13 +8,13 @@ export function Layout() {
         <ul>
           <li>
             <Link to="/">Home</Link>
-          </li>
+          </li>{% if config.frontend.includeExamplePages %}
           <li>
             <Link to="/about">About</Link>
           </li>
           <li>
             <Link to="/contact">Contact</Link>
-          </li>
+          </li>{% endif %}
         </ul>
       </nav>
       <hr />

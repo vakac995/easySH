@@ -1,4 +1,5 @@
 
+{% if config.frontend.includeHusky %}
 dist
 node_modules
 coverage
@@ -6,3 +7,6 @@ coverage
 *.md
 pnpm-lock.yaml
 package-lock.json
+{% else %}
+# Prettier ignore configuration is disabled. Enable "Include Husky" in configuration to use this file.
+{% endif %}

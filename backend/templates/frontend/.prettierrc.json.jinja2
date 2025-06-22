@@ -1,7 +1,11 @@
 
+{% if config.frontend.includeHusky %}
 {
   "semi": true,
   "singleQuote": true,
   "trailingComma": "es5",
   "printWidth": 80
 }
+{% else %}
+// Prettier configuration is disabled. Enable "Include Husky" in configuration to use this file.
+{% endif %}

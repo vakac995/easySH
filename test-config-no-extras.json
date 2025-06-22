@@ -1,0 +1,31 @@
+{
+  "global": {
+    "projectName": "TestProject"
+  },
+  "backend": {
+    "include": true,
+    "projectName": "backend",
+    "projectDescription": "Test Backend Service",
+    "projectVersion": "1.0.0",
+    "dbHost": "localhost",
+    "dbPort": 5432,
+    "dbName": "test_db",
+    "dbUser": "test_user",
+    "dbPassword": "test_pass",
+    "pgAdminEmail": "admin@test.com",
+    "pgAdminPassword": "admin123",
+    "debug": false,
+    "logLevel": "INFO"
+  },
+  "frontend": {
+    "include": true,
+    "projectName": "frontend",
+    "includeExamplePages": false,
+    "includeHusky": false,
+    "moduleSystem": {
+      "include": false,
+      "modules": [],
+      "features": []
+    }
+  }
+}
