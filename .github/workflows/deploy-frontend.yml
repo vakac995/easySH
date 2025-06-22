@@ -22,7 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,12 +32,14 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm ci
-          
-      - name: Build
+          npm ci --legacy-peer-deps
+            - name: Build
         run: |
           cd frontend
           npm run build
+          touch dist/.nojekyll
+        env:
+          NODE_ENV: production
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
