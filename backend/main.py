@@ -40,6 +40,7 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
 
@@ -131,19 +132,21 @@ CORS_METHODS = "GET, POST, PUT, DELETE, OPTIONS"
 # --- Simple CORS Solution ---
 # Since Railway overrides CORS headers, let's try a basic approach
 
+# Add the production frontend URL to the list of allowed origins
+# This will allow the frontend hosted on GitHub Pages to communicate with the backend.
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://vakac995.github.io",  # Production frontend
+]
 
-@app.options("/{full_path:path}")
-async def options_handler():
-    """Handle all preflight CORS requests"""
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": CORS_METHODS,
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Max-Age": "86400",
-        },
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # --- Jinja2 Template Engine Setup ---
