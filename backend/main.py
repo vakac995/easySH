@@ -128,24 +128,17 @@ app = FastAPI(
 
 # --- CORS Middleware Setup ---
 # This allows the frontend (running on a different port) to communicate with the backend.
-# For production, we explicitly allow the GitHub Pages domain
+# Temporary fix: Allow all origins to debug CORS issues
 
-# Get allowed origins from environment variable or use defaults
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else []
-
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://vakac995.github.io",  # GitHub Pages - production frontend
-] + allowed_origins
+origins = ["*"]  # Allow all origins temporarily for debugging
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,  # Must be False when using allow_origins=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # --- Jinja2 Template Engine Setup ---
