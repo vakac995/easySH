@@ -1,14 +1,19 @@
 import os
 import io
 import zipfile
+import logging
 from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
 from fastapi.middleware.cors import CORSMiddleware
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class GlobalConfig(BaseModel):
@@ -110,10 +115,27 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vakac995.github.io"],  # Restrict to a specific origin
+    allow_origins=[
+        "https://vakac995.github.io",          # GitHub Pages main domain
+        "https://vakac995.github.io/easySH",   # GitHub Pages project path
+        "http://localhost:5173",               # Local development frontend
+        "http://127.0.0.1:5173",              # Alternative local development
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language", 
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+    ],
+    expose_headers=["Content-Disposition"],
+    max_age=86400,  # 24 hours
 )
 
 template_dir = Path(__file__).parent / "templates"
@@ -173,7 +195,7 @@ def _process_template_directory(
                 )
                 zip_file.writestr(str(zip_path), rendered_content)
             except Exception as e:
-                print(f"Error processing template {template_path}: {e}")
+                logger.error(f"Error processing template {template_path}: {e}")
                 raise HTTPException(
                     status_code=500,
                     detail=f"Failed to render template: {filename}",
@@ -196,6 +218,9 @@ async def generate_project(config: MasterConfig):
     Returns:
         StreamingResponse: A zip archive containing the generated project.
     """
+    logger.info(f"Received project generation request for: {config.global_config.projectName}")
+    logger.info(f"Backend included: {config.backend.include}, Frontend included: {config.frontend.include}")
+    
     if not config.backend.include and not config.frontend.include:
         raise HTTPException(
             status_code=400,
@@ -226,7 +251,7 @@ async def generate_project(config: MasterConfig):
             )
             zip_file.writestr(str(setup_script_path), rendered_setup_script)
         except Exception as e:
-            print(f"Error processing setup_environment.sh template: {e}")
+            logger.error(f"Error processing setup_environment.sh template: {e}")
             raise HTTPException(
                 status_code=500,
                 detail="Failed to render setup_environment.sh",
@@ -242,6 +267,20 @@ async def generate_project(config: MasterConfig):
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
 
 
+@app.options("/api/generate", tags=["Generation"])
+async def generate_project_options():
+    """Handle CORS preflight requests for the generate endpoint."""
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",  # FastAPI middleware will handle specific origins
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
+
+
 @app.get("/", tags=["Health Check"])
 def read_root():
     """Provides a simple health check endpoint to confirm the API is running.
@@ -251,4 +290,31 @@ def read_root():
     """
     return JSONResponse(
         content={"status": "ok", "message": "Project Generation API is running."}
+    )
+
+
+@app.get("/api/cors-test", tags=["Health Check"])
+def cors_test():
+    """CORS test endpoint to verify cross-origin requests are working."""
+    logger.info("CORS test endpoint called successfully")
+    return JSONResponse(
+        content={
+            "status": "success", 
+            "message": "CORS is working correctly",
+            "timestamp": "2025-06-23T00:00:00Z"
+        }
+    )
+
+
+@app.options("/api/cors-test", tags=["Health Check"])
+def cors_test_options():
+    """Handle CORS preflight requests for the CORS test endpoint."""
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+            "Access-Control-Max-Age": "86400",
+        }
     )
