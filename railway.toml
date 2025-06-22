@@ -12,6 +12,8 @@ restartPolicyMaxRetries = 10
 for = "/*"
 [headers.values]
 Access-Control-Allow-Origin = "https://vakac995.github.io"
+Access-Control-Allow-Methods = "*"
+Access-Control-Allow-Headers = "*"
 
 [env]
 PORT = "8000"
