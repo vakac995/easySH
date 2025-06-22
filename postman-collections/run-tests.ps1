@@ -103,11 +103,11 @@ function Run-LoadTests {
 switch ($Environment) {
     "dev" {
         Write-Host "Running Development Environment Tests" -ForegroundColor Blue
-        Run-Tests "Development" $DevEnvFile "dev"
+        Invoke-Newman "Development" $DevEnvFile "dev"
     }
     "prod" {
         Write-Host "Running Production Environment Tests" -ForegroundColor Blue
-        Run-Tests "Production" $ProdEnvFile "prod"
+        Invoke-Newman "Production" $ProdEnvFile "prod"
     }
     "load-dev" {
         Write-Host "Running Development Load Tests" -ForegroundColor Blue
@@ -119,8 +119,8 @@ switch ($Environment) {
     }
     "all" {
         Write-Host "Running All Tests" -ForegroundColor Blue
-        $devResult = Run-Tests "Development" $DevEnvFile "dev"
-        $prodResult = Run-Tests "Production" $ProdEnvFile "prod"
+        $devResult = Invoke-Newman "Development" $DevEnvFile "dev"
+        $prodResult = Invoke-Newman "Production" $ProdEnvFile "prod"
         $loadDevResult = Run-LoadTests "Development" $DevEnvFile "dev"
         $loadProdResult = Run-LoadTests "Production" $ProdEnvFile "prod"
         
