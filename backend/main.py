@@ -125,8 +125,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# --- Constants ---
+CORS_METHODS = "GET, POST, PUT, DELETE, OPTIONS"
+
 # --- Simple CORS Solution ---
 # Since Railway overrides CORS headers, let's try a basic approach
+
 
 @app.options("/{full_path:path}")
 async def options_handler():
@@ -135,11 +139,12 @@ async def options_handler():
         content={},
         headers={
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Methods": CORS_METHODS,
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Max-Age": "86400",
-        }
+        },
     )
+
 
 # --- Jinja2 Template Engine Setup ---
 # This assumes a 'templates' directory exists in the same location as main.py
@@ -239,12 +244,12 @@ async def generate_project(config: MasterConfig):
             )
 
     # Rewind buffer to the beginning
-    zip_buffer.seek(0)    # Set headers for file download and CORS
+    zip_buffer.seek(0)  # Set headers for file download and CORS
     zip_filename = f"{config.global_config.projectName}.zip"
     headers = {
         "Content-Disposition": f'attachment; filename="{zip_filename}"',
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Methods": CORS_METHODS,
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Expose-Headers": "*",
     }
@@ -260,9 +265,9 @@ def read_root():
         content={"status": "ok", "message": "Project Generation API is running."},
         headers={
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Methods": CORS_METHODS,
             "Access-Control-Allow-Headers": "*",
-        }
+        },
     )
 
 
