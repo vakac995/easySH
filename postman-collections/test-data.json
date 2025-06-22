@@ -1,0 +1,454 @@
+{
+  "testScenarios": {
+    "minimal": {
+      "description": "Minimal configuration for quick testing",
+      "data": {
+        "global": {
+          "projectName": "MinimalTest"
+        },
+        "backend": {
+          "include": true
+        },
+        "frontend": {
+          "include": false
+        }
+      }
+    },
+    "backend_only": {
+      "description": "Backend-only project with full configuration",
+      "data": {
+        "global": {
+          "projectName": "BackendOnlyProject"
+        },
+        "backend": {
+          "include": true,
+          "projectName": "api-backend",
+          "projectDescription": "Comprehensive backend service",
+          "projectVersion": "1.2.0",
+          "dbHost": "db.example.com",
+          "dbPort": 5432,
+          "dbName": "production_db",
+          "dbUser": "api_user",
+          "dbPassword": "secure_password_123",
+          "pgAdminEmail": "admin@company.com",
+          "pgAdminPassword": "admin_secure_pass",
+          "debug": false,
+          "logLevel": "INFO"
+        },
+        "frontend": {
+          "include": false
+        }
+      }
+    },
+    "frontend_only": {
+      "description": "Frontend-only project with modules",
+      "data": {
+        "global": {
+          "projectName": "FrontendOnlyProject"
+        },
+        "backend": {
+          "include": false
+        },
+        "frontend": {
+          "include": true,
+          "projectName": "react-frontend",
+          "projectDescription": "Modern React frontend application",
+          "includeExamplePages": true,
+          "includeHusky": true,
+          "moduleSystem": {
+            "include": true,
+            "modules": [
+              {
+                "id": "auth",
+                "name": "Authentication Module",
+                "permissions": "admin"
+              },
+              {
+                "id": "profile",
+                "name": "User Profile Module",
+                "permissions": "user"
+              }
+            ],
+            "features": [
+              {
+                "id": "dark-mode"
+              },
+              {
+                "id": "responsive-design"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "fullstack_simple": {
+      "description": "Simple full-stack project",
+      "data": {
+        "global": {
+          "projectName": "SimpleFullStack"
+        },
+        "backend": {
+          "include": true,
+          "projectName": "backend",
+          "projectDescription": "Simple backend API",
+          "projectVersion": "1.0.0"
+        },
+        "frontend": {
+          "include": true,
+          "projectName": "frontend",
+          "projectDescription": "Simple frontend app",
+          "includeExamplePages": false,
+          "includeHusky": false,
+          "moduleSystem": {
+            "include": false,
+            "modules": [],
+            "features": []
+          }
+        }
+      }
+    },
+    "fullstack_complex": {
+      "description": "Complex full-stack project with all features",
+      "data": {
+        "global": {
+          "projectName": "ComplexFullStackProject"
+        },
+        "backend": {
+          "include": true,
+          "projectName": "advanced-backend",
+          "projectDescription": "Advanced backend with full features",
+          "projectVersion": "2.1.0",
+          "dbHost": "postgres-cluster.internal",
+          "dbPort": 5432,
+          "dbName": "advanced_app_db",
+          "dbUser": "app_service_user",
+          "dbPassword": "ultra_secure_password_456",
+          "pgAdminEmail": "dba@enterprise.com",
+          "pgAdminPassword": "dba_ultra_secure",
+          "debug": false,
+          "logLevel": "WARNING"
+        },
+        "frontend": {
+          "include": true,
+          "projectName": "advanced-frontend",
+          "projectDescription": "Advanced frontend with complete module system",
+          "includeExamplePages": true,
+          "includeHusky": true,
+          "moduleSystem": {
+            "include": true,
+            "modules": [
+              {
+                "id": "authentication",
+                "name": "Authentication & Authorization",
+                "permissions": "admin"
+              },
+              {
+                "id": "dashboard",
+                "name": "Analytics Dashboard",
+                "permissions": "user"
+              },
+              {
+                "id": "user-management",
+                "name": "User Management",
+                "permissions": "admin"
+              },
+              {
+                "id": "reporting",
+                "name": "Advanced Reporting",
+                "permissions": "manager"
+              },
+              {
+                "id": "settings",
+                "name": "System Settings",
+                "permissions": "admin"
+              },
+              {
+                "id": "notifications",
+                "name": "Real-time Notifications",
+                "permissions": "user"
+              },
+              {
+                "id": "audit-logs",
+                "name": "Audit & Logging",
+                "permissions": "admin"
+              }
+            ],
+            "features": [
+              {
+                "id": "dark-mode"
+              },
+              {
+                "id": "multi-language"
+              },
+              {
+                "id": "real-time-updates"
+              },
+              {
+                "id": "advanced-search"
+              },
+              {
+                "id": "data-export"
+              },
+              {
+                "id": "mobile-responsive"
+              },
+              {
+                "id": "offline-support"
+              },
+              {
+                "id": "analytics-tracking"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "enterprise": {
+      "description": "Enterprise-grade configuration",
+      "data": {
+        "global": {
+          "projectName": "EnterpriseApplication"
+        },
+        "backend": {
+          "include": true,
+          "projectName": "enterprise-api",
+          "projectDescription": "Enterprise-grade API service with microservices architecture",
+          "projectVersion": "3.0.0",
+          "dbHost": "enterprise-db-cluster.internal.company.com",
+          "dbPort": 5432,
+          "dbName": "enterprise_production_db",
+          "dbUser": "enterprise_service_account",
+          "dbPassword": "enterprise_grade_security_password_789",
+          "pgAdminEmail": "database.admin@enterprise.company.com",
+          "pgAdminPassword": "enterprise_dba_secure_access",
+          "debug": false,
+          "logLevel": "ERROR"
+        },
+        "frontend": {
+          "include": true,
+          "projectName": "enterprise-portal",
+          "projectDescription": "Enterprise portal with comprehensive business modules",
+          "includeExamplePages": true,
+          "includeHusky": true,
+          "moduleSystem": {
+            "include": true,
+            "modules": [
+              {
+                "id": "sso-authentication",
+                "name": "Single Sign-On Authentication",
+                "permissions": "system"
+              },
+              {
+                "id": "executive-dashboard",
+                "name": "Executive Dashboard",
+                "permissions": "executive"
+              },
+              {
+                "id": "business-intelligence",
+                "name": "Business Intelligence",
+                "permissions": "analyst"
+              },
+              {
+                "id": "customer-management",
+                "name": "Customer Relationship Management",
+                "permissions": "sales"
+              },
+              {
+                "id": "financial-reporting",
+                "name": "Financial Reporting",
+                "permissions": "finance"
+              },
+              {
+                "id": "hr-management",
+                "name": "Human Resources Management",
+                "permissions": "hr"
+              },
+              {
+                "id": "project-management",
+                "name": "Project Management",
+                "permissions": "manager"
+              },
+              {
+                "id": "compliance-tracking",
+                "name": "Compliance & Audit Tracking",
+                "permissions": "compliance"
+              },
+              {
+                "id": "vendor-management",
+                "name": "Vendor Management",
+                "permissions": "procurement"
+              },
+              {
+                "id": "document-management",
+                "name": "Document Management System",
+                "permissions": "user"
+              }
+            ],
+            "features": [
+              {
+                "id": "enterprise-sso"
+              },
+              {
+                "id": "advanced-rbac"
+              },
+              {
+                "id": "audit-trail"
+              },
+              {
+                "id": "data-encryption"
+              },
+              {
+                "id": "multi-tenant"
+              },
+              {
+                "id": "api-rate-limiting"
+              },
+              {
+                "id": "comprehensive-logging"
+              },
+              {
+                "id": "performance-monitoring"
+              },
+              {
+                "id": "disaster-recovery"
+              },
+              {
+                "id": "compliance-reporting"
+              },
+              {
+                "id": "automated-testing"
+              },
+              {
+                "id": "ci-cd-integration"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "errorTestCases": {
+    "empty_project_name": {
+      "description": "Test validation with empty project name",
+      "data": {
+        "global": {
+          "projectName": ""
+        },
+        "backend": {
+          "include": true
+        },
+        "frontend": {
+          "include": false
+        }
+      },
+      "expectedStatus": 422
+    },
+    "no_components": {
+      "description": "Test error when no components are selected",
+      "data": {
+        "global": {
+          "projectName": "NoComponentsProject"
+        },
+        "backend": {
+          "include": false
+        },
+        "frontend": {
+          "include": false
+        }
+      },
+      "expectedStatus": 400
+    },
+    "invalid_db_port": {
+      "description": "Test validation with invalid database port",
+      "data": {
+        "global": {
+          "projectName": "InvalidPortProject"
+        },
+        "backend": {
+          "include": true,
+          "dbPort": "invalid_port"
+        },
+        "frontend": {
+          "include": false
+        }
+      },
+      "expectedStatus": 422
+    },
+    "missing_required_field": {
+      "description": "Test with missing required global field",
+      "data": {
+        "backend": {
+          "include": true
+        },
+        "frontend": {
+          "include": false
+        }
+      },
+      "expectedStatus": 422
+    }
+  },
+  "performanceTestCases": {
+    "large_module_count": {
+      "description": "Test with maximum number of modules and features",
+      "modules_count": 15,
+      "features_count": 20,
+      "expected_max_response_time": 30000
+    },
+    "concurrent_requests": {
+      "description": "Test concurrent request handling",
+      "concurrent_count": 5,
+      "expected_success_rate": 95
+    },
+    "large_project_name": {
+      "description": "Test with very long project names",
+      "project_name_length": 100,
+      "expected_max_response_time": 10000
+    }
+  },
+  "edgeCases": {
+    "special_characters": {
+      "description": "Test with special characters in project name",
+      "data": {
+        "global": {
+          "projectName": "Test-Project_With.Special@Characters"
+        },
+        "backend": {
+          "include": true
+        },
+        "frontend": {
+          "include": false
+        }
+      }
+    },
+    "unicode_characters": {
+      "description": "Test with Unicode characters",
+      "data": {
+        "global": {
+          "projectName": "测试项目_ТестПроект_🚀Project"
+        },
+        "backend": {
+          "include": true
+        },
+        "frontend": {
+          "include": false
+        }
+      }
+    },
+    "maximum_lengths": {
+      "description": "Test with maximum allowed field lengths",
+      "data": {
+        "global": {
+          "projectName": "MaximumLengthProjectNameThatTestsTheValidationLimitsOfTheAPIEndpoint"
+        },
+        "backend": {
+          "include": true,
+          "projectDescription": "This is a very long project description that tests the maximum allowed length for the project description field in the backend configuration section of the API request payload",
+          "dbPassword": "very_long_password_that_tests_maximum_field_length_validation_rules"
+        },
+        "frontend": {
+          "include": false
+        }
+      }
+    }
+  }
+}
