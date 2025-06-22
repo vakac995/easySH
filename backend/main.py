@@ -38,8 +38,8 @@ import zipfile
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, Response
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
 
@@ -125,19 +125,21 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- CORS Headers Setup ---
-# Manual CORS handling due to Railway proxy conflicts
+# --- Simple CORS Solution ---
+# Since Railway overrides CORS headers, let's try a basic approach
 
-@app.options("/api/generate")
-async def options_generate():
-    """Handle preflight CORS requests"""
-    headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Expose-Headers": "*",
-    }
-    return Response(headers=headers)
+@app.options("/{full_path:path}")
+async def options_handler():
+    """Handle all preflight CORS requests"""
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
 
 # --- Jinja2 Template Engine Setup ---
 # This assumes a 'templates' directory exists in the same location as main.py
@@ -254,7 +256,14 @@ async def generate_project(config: MasterConfig):
 @app.get("/", tags=["Health Check"])
 def read_root():
     """A simple health check endpoint."""
-    return {"status": "ok", "message": "Project Generation API is running."}
+    return JSONResponse(
+        content={"status": "ok", "message": "Project Generation API is running."},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 
 # ==============================================================================
