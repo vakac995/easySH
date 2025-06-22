@@ -32,7 +32,6 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         Select your frontend framework and UI library.
       </p>
-
       <div className='mb-6'>
         <label
           htmlFor='frontend-framework-options'
@@ -49,7 +48,8 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
             The only option, for now!
           </span>
         </div>
-      </div>      <div className='mb-6'>
+      </div>
+      <div className='mb-6'>
         <label
           htmlFor='ui-library-select'
           className='block text-xl font-bold mb-2 text-gray-700 dark:text-gray-200'
@@ -68,15 +68,13 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
           <option value='material-ui'>Material-UI</option>
         </select>
       </div>
-
       <textarea
         value={config.frontend.projectDescription}
         onChange={handleChange('frontend.projectDescription')}
-        placeholder="Enter frontend description"
-        className="w-full p-3 mt-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+        placeholder='Enter frontend description'
+        className='w-full p-3 mt-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'
       />
-
-      <div className="mt-6 flex justify-between">
+      <div className='mt-6 flex justify-between'>
         <button
           onClick={prevStep}
           className='bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105'
