@@ -90,7 +90,7 @@ The easySH project generator has been successfully enhanced with improved gamifi
 
 // Body text
 <p className="text-base text-fibank-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-  Configure your project settings to generate the perfect starter template.
+  Configure the project settings to generate the perfect starter template.
 </p>
 ```
 

@@ -64,7 +64,7 @@ The frontend will be available at `http://localhost:5173`
 
 ### 4. Verify Setup
 
-1. Open `http://localhost:5173` in your browser
+1. Open `http://localhost:5173` in the browser
 2. Complete the wizard with sample data
 3. Generate a test project
 4. Verify the downloaded ZIP contains the expected files

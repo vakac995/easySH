@@ -1,7 +1,7 @@
-# Step-by-step integration after running your createViteApp.sh script
+# Step-by-step integration after running the createViteApp.sh script
 
-# 1. Navigate to your created project
-cd your-project-name
+# 1. Navigate to the created project
+cd project-name
 
 # 2. Install additional dependencies for the configuration system
 npm install
@@ -497,7 +497,7 @@ export const ConditionalRender: React.FC<ConditionalRenderProps> = ({
 };
 EOF
 
-# 9. Update your existing App.tsx to include the ConfigProvider
+# 9. Update the existing App.tsx to include the ConfigProvider
 cat >src/App.tsx <<'EOF'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConfigProvider } from '@/providers/ConfigProvider';
@@ -506,7 +506,7 @@ import { Home } from '@/pages/Home';
 import { About } from '@/pages/About';
 import { Contact } from '@/pages/Contact';
 
-// Example user data - replace with your auth system
+// Example user data - replace with the actual auth system
 const mockUser = {
   id: 'user123',
   roles: ['admin', 'user'],
@@ -684,7 +684,7 @@ echo ""
 echo "✅ Configuration system integration complete!"
 echo ""
 echo "Manual steps remaining:"
-echo "1. Add these scripts to your package.json:"
+echo "1. Add these scripts to the package.json:"
 echo '   "config:validate": "node scripts/validateConfig.js"'
 echo '   "config:deploy": "node scripts/deployConfig.js"'
 echo ""

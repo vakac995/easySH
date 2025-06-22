@@ -132,6 +132,8 @@ origins = [
     "http://localhost",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://*.github.io",  # GitHub Pages
+    "https://vakac995.github.io",
 ]
 
 app.add_middleware(

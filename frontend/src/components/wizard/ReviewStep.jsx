@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { API_BASE_URL } from '../../config/api';
 
 // This helper function transforms the frontend's wizard state into the
 // exact JSON structure expected by the backend's Pydantic models.
@@ -56,9 +57,8 @@ const transformConfigForApi = (config) => {
 
 const ReviewStep = ({ prevStep, nextStep, config }) => {
   const submit = async () => {
-    const apiPayload = transformConfigForApi(config);
-    try {
-      const response = await fetch('http://localhost:8000/api/generate', {
+    const apiPayload = transformConfigForApi(config);    try {
+      const response = await fetch(`${API_BASE_URL}/api/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

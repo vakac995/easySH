@@ -96,7 +96,7 @@ print_status "Creating modern React application: $PROJECT_NAME"
 # Step 1: Create Vite project
 print_status "Creating Vite project with React and TypeScript..."
 if ! npm create vite@^6.3.5 "$PROJECT_NAME" -- --template react-ts; then
-  print_error "Failed to create Vite project. Please check your npm installation."
+  print_error "Failed to create Vite project. Please check the npm installation."
   exit 1
 fi
 

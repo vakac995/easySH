@@ -47,8 +47,8 @@ Changelog, bug fixes, and improvement history.
 
 ### For Users
 1. Open the web application at `http://localhost:5173`
-2. Follow the guided wizard to configure your project
-3. Download and extract your generated project
+2. Follow the guided wizard to configure the project
+3. Download and extract the generated project
 4. Run the included setup script to get started
 
 ### For Developers
