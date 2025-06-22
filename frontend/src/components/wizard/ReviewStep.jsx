@@ -77,7 +77,9 @@ const transformConfigForApi = (config) => {
  */
 const ReviewStep = ({ prevStep, nextStep, config }) => {
   const submit = async () => {
-    const apiPayload = transformConfigForApi(config);    try {
+    const apiPayload = transformConfigForApi(config);
+
+    try {
       const response = await fetch(`${API_BASE_URL}/api/generate`, {
         method: 'POST',
         headers: {
@@ -114,7 +116,8 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
       </h2>
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         One last look before we generate your project!
-      </p>      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
+      </p>{' '}
+      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
         <div className='mb-6'>
           <h4 className='text-xl font-bold border-b-2 border-blue-500 pb-2 mb-4 text-gray-800 dark:text-white'>
             Project
@@ -162,10 +165,12 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
             <strong>UI Library:</strong> {config.frontend.uiLibrary}
           </p>
           <p className='text-gray-700 dark:text-gray-300'>
-            <strong>Example Pages:</strong> {config.frontend.includeExamplePages ? 'Included' : 'Not included'}
+            <strong>Example Pages:</strong>{' '}
+            {config.frontend.includeExamplePages ? 'Included' : 'Not included'}
           </p>
           <p className='text-gray-700 dark:text-gray-300'>
-            <strong>Husky (Git Hooks):</strong> {config.frontend.includeHusky ? 'Included' : 'Not included'}
+            <strong>Husky (Git Hooks):</strong>{' '}
+            {config.frontend.includeHusky ? 'Included' : 'Not included'}
           </p>
         </div>
 
@@ -180,11 +185,12 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
               )}
             </ul>
           ) : (
-            <p className='text-gray-700 dark:text-gray-300 italic'>No additional modules selected</p>
+            <p className='text-gray-700 dark:text-gray-300 italic'>
+              No additional modules selected
+            </p>
           )}
         </div>
       </div>
-
       <div className='flex justify-between mt-8'>
         <button
           onClick={prevStep}

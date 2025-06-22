@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
  * @returns {JSX.Element} The progress bar component.
  */
 const ProgressBar = ({ currentStep, totalSteps }) => {
-  const percentage = (currentStep / totalSteps) * 100;
+  const percentage = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0;
 
   return (
     <div className='progress-bar-container'>

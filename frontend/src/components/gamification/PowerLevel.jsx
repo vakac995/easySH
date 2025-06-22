@@ -17,6 +17,8 @@ import { motion } from 'framer-motion';
  * @returns {JSX.Element} The power level component.
  */
 const PowerLevel = ({ level }) => {
+  const percentage = Math.min(level, 100);
+
   /**
    * Returns a color for the power level bar based on the level.
    * @param {number} level - The user's power level.
@@ -77,7 +79,7 @@ const PowerLevel = ({ level }) => {
         <motion.div
           className={`h-full bg-gradient-to-r ${getPowerColor(level)} rounded-full shadow-xl relative`}
           initial={{ width: 0 }}
-          animate={{ width: `${level}%` }}
+          animate={{ width: `${percentage}%` }}
           transition={{ duration: 1.2, ease: 'easeOut' }}
         >
           {/* Animated shine effect */}
@@ -123,7 +125,7 @@ const PowerLevel = ({ level }) => {
             animate={{ scale: level >= 100 ? [1, 1.1, 1] : 1 }}
             transition={{ duration: 0.5, repeat: level >= 100 ? Infinity : 0, repeatDelay: 2 }}
           >
-            {level}%
+            {percentage}%
           </motion.span>
           {level >= 100 && (
             <motion.span

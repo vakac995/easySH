@@ -86,6 +86,7 @@ class FrontendConfig(BaseModel):
 
     include: bool = False
     projectName: str = "frontend"
+    projectDescription: str = "A modern frontend application."
     includeExamplePages: bool = False
     includeHusky: bool = False
     moduleSystem: FrontendModuleSystem = Field(default_factory=FrontendModuleSystem)
@@ -109,7 +110,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vakac995.github.io"],  # Allows all origins
+    allow_origins=["https://vakac995.github.io"],  # Restrict to a specific origin
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
@@ -123,7 +124,7 @@ def _process_template_directory(
     zip_file: zipfile.ZipFile,
     config: MasterConfig,
     dir_name: str,
-    template_dir: Path,
+    template_dir_path: Path,
     jinja_env: Environment,
 ):
     """Recursively processes a directory of Jinja2 templates and adds them to a zip archive.
@@ -132,13 +133,13 @@ def _process_template_directory(
         zip_file (zipfile.ZipFile): The zip archive to add the rendered files to.
         config (MasterConfig): The master configuration object for rendering templates.
         dir_name (str): The name of the directory being processed (e.g., 'backend').
-        template_dir (Path): The root path of the templates directory.
+        template_dir_path (Path): The root path of the templates directory.
         jinja_env (Environment): The Jinja2 environment.
 
     Raises:
         HTTPException: If a template fails to render.
     """
-    source_dir = template_dir / dir_name
+    source_dir = template_dir_path / dir_name
     for root, _, files in os.walk(source_dir):
         template_root_path = Path(root)
         for filename in files:

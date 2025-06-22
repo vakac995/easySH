@@ -56,42 +56,6 @@ const WelcomeStep = ({ nextStep, handleChange, config }) => {
             className='w-full max-w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border'
           />
         </div>
-
-        <div>
-          <label
-            htmlFor='projectDescription'
-            className='block text-lg font-semibold mb-2 text-gray-700 dark:text-gray-200'
-          >
-            Project Description
-          </label>
-          <textarea
-            id='projectDescription'
-            name='projectDescription'
-            value={config.backend.projectDescription}
-            onChange={handleChange('backend.projectDescription')}
-            placeholder='A brief description of your project...'
-            rows={3}
-            className='w-full max-w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border'
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor='projectVersion'
-            className='block text-lg font-semibold mb-2 text-gray-700 dark:text-gray-200'
-          >
-            Initial Version
-          </label>
-          <input
-            type='text'
-            id='projectVersion'
-            name='projectVersion'
-            value={config.backend.projectVersion}
-            onChange={handleChange('backend.projectVersion')}
-            placeholder='0.1.0'
-            className='w-full max-w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border'
-          />
-        </div>
       </div>
       <motion.button
         whileHover={{ scale: 1.05 }}
