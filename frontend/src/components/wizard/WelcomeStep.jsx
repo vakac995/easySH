@@ -37,7 +37,7 @@ const WelcomeStep = ({ nextStep, handleChange, config }) => {
       </p>
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         First, let's set up your project basics.
-      </p>{' '}
+      </p>
       <div className='w-full max-w-lg mx-auto mb-6 space-y-4'>
         <div>
           <label
@@ -56,7 +56,7 @@ const WelcomeStep = ({ nextStep, handleChange, config }) => {
             className='w-full max-w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border'
           />
         </div>
-        
+
         <div>
           <label
             htmlFor='projectDescription'
@@ -74,7 +74,7 @@ const WelcomeStep = ({ nextStep, handleChange, config }) => {
             className='w-full max-w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border'
           />
         </div>
-        
+
         <div>
           <label
             htmlFor='projectVersion'
