@@ -1,11 +1,27 @@
+/**
+ * @file AchievementList.jsx
+ * @description This component displays a list of recent achievements.
+ * It uses framer-motion for animations and limits the number of visible achievements to 3.
+ * @requires react
+ * @requires prop-types
+ * @requires framer-motion
+ * @requires ./Achievement
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AnimatePresence } from 'framer-motion';
 import Achievement from './Achievement';
 
+/**
+ * A component that displays a list of recent achievements.
+ * @param {object} props - The component's props.
+ * @param {Array<object>} props.achievements - The list of achievements to display.
+ * @returns {JSX.Element} The achievement list component.
+ */
 const AchievementList = ({ achievements }) => {
   // Sort achievements by timestamp (newest first) and limit to last 3
-  const recentAchievements = achievements
+  const recentAchievements = [...achievements]
     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
     .slice(0, 3);
 

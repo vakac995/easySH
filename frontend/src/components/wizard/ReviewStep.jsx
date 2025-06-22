@@ -1,9 +1,21 @@
+/**
+ * @file ReviewStep.jsx
+ * @description This component is a step in the wizard that allows the user to review their configuration before generating the project.
+ * It also handles the submission of the configuration to the backend API.
+ * @requires react
+ * @requires prop-types
+ * @requires ../../config/api
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { API_BASE_URL } from '../../config/api';
 
-// This helper function transforms the frontend's wizard state into the
-// exact JSON structure expected by the backend's Pydantic models.
+/**
+ * Transforms the configuration from the frontend's state to the format expected by the backend API.
+ * @param {object} config - The configuration from the frontend's state.
+ * @returns {object} The transformed configuration.
+ */
 const transformConfigForApi = (config) => {
   const { projectName, backend, frontend, modules } = config;
 
@@ -55,6 +67,14 @@ const transformConfigForApi = (config) => {
   };
 };
 
+/**
+ * A component that allows the user to review their configuration.
+ * @param {object} props - The component's props.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The review step component.
+ */
 const ReviewStep = ({ prevStep, nextStep, config }) => {
   const submit = async () => {
     const apiPayload = transformConfigForApi(config);    try {

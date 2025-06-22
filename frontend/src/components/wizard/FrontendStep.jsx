@@ -1,6 +1,23 @@
+/**
+ * @file FrontendStep.jsx
+ * @description This component is a step in the wizard that allows the user to configure the frontend.
+ * It includes options for selecting the frontend framework, UI library, and other additional options.
+ * @requires react
+ * @requires prop-types
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * A component that allows the user to configure the frontend.
+ * @param {object} props - The component's props.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.handleChange - A function to handle changes to the configuration.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The frontend step component.
+ */
 const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
   const Continue = (e) => {
     e.preventDefault();

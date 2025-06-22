@@ -1,3 +1,28 @@
+/**
+ * @file Wizard.jsx
+ * @description This component is the main wizard interface for creating a new project.
+ * It manages the state of the wizard, including the current step, configuration,
+ * achievements, and power level. It also handles the logic for unlocking achievements
+ * and calculating the power level based on the user's selections.
+ * @requires react
+ * @requires framer-motion
+ * @requires ./WelcomeStep
+ * @requires ./BackendStep
+ * @requires ./DatabaseConfigStep
+ * @requires ./FrontendStep
+ * @requires ./ModuleStep
+ * @requires ./ReviewStep
+ * @requires ./ProgressBar
+ * @requires ./AnimatedStep
+ * @requires ../achievements/AchievementList
+ * @requires ./Celebration
+ * @requires ../gamification/GamificationPanel
+ * @requires ./CompletionStep
+ * @requires ../Layout
+ * @requires ../Card
+ * @requires ../../utils/soundEffects
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import WelcomeStep from './WelcomeStep';
@@ -57,6 +82,10 @@ const initialConfig = {
   },
 };
 
+/**
+ * The main wizard component.
+ * @returns {JSX.Element} The wizard interface.
+ */
 const Wizard = () => {
   const [step, setStep] = useState(1);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -65,7 +94,16 @@ const Wizard = () => {
   const [powerLevel, setPowerLevel] = useState(0);
   const [config, setConfig] = useState(initialConfig);
 
-  // Define unlockAchievement function first
+  /**
+   * Unlocks an achievement and adds it to the list of achievements.
+   * Plays a sound effect and triggers a celebration for special achievements.
+   * @param {object} achievement - The achievement to unlock.
+   * @param {string} achievement.id - The unique ID of the achievement.
+   * @param {string} achievement.title - The title of the achievement.
+   * @param {string} achievement.icon - The icon for the achievement.
+   * @param {string} achievement.description - The description of the achievement.
+   * @param {boolean} [achievement.special=false] - Whether the achievement is special.
+   */
   const unlockAchievement = useCallback((achievement) => {
     setAchievements((prev) => {
       if (prev.find((a) => a.id === achievement.id)) {
@@ -95,7 +133,9 @@ const Wizard = () => {
     });
   }, []);
 
-  // Achievement tracking for configuration changes
+  /**
+   * Tracks achievements based on configuration changes.
+   */
   useEffect(() => {
     // Project naming achievement
     if (config.projectName !== 'MyNewProject' && config.projectName.length > 0) {
@@ -164,6 +204,9 @@ const Wizard = () => {
     }
   }, [config, powerLevel, unlockAchievement]);
 
+  /**
+   * Calculates the power level based on the current configuration.
+   */
   useEffect(() => {
     const calculatePowerLevel = () => {
       let level = 0;
@@ -192,6 +235,9 @@ const Wizard = () => {
     calculatePowerLevel();
   }, [config]);
 
+  /**
+   * Triggers a celebration effect and marks the wizard as complete.
+   */
   const triggerCelebration = () => {
     setShowCelebration(true);
     setTimeout(() => {

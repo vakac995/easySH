@@ -1,6 +1,22 @@
+/**
+ * @file DatabaseConfigStep.jsx
+ * @description This component is a step in the wizard that allows the user to configure the database.
+ * It includes fields for the database name, user, password, port, and PgAdmin credentials.
+ * @requires react
+ * @requires prop-types
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * A component that allows the user to configure the database.
+ * @param {object} props - The component's props.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.handleChange - A function to handle changes to the configuration.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The database configuration step component.
+ */
 const DatabaseConfigStep = ({ nextStep, prevStep, handleChange, config }) => {
   const Continue = (e) => {
     e.preventDefault();

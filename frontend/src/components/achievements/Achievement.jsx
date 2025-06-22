@@ -1,3 +1,12 @@
+/**
+ * @file Achievement.jsx
+ * @description This component displays a single achievement with a title, icon, and description.
+ * It uses framer-motion for animations and has a special appearance for new achievements.
+ * @requires react
+ * @requires prop-types
+ * @requires framer-motion
+ */
+
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
@@ -27,6 +36,15 @@ const achievementVariants = {
   },
 };
 
+/**
+ * A component that displays a single achievement.
+ * @param {object} props - The component's props.
+ * @param {string} props.title - The title of the achievement.
+ * @param {string} props.icon - The icon for the achievement.
+ * @param {string} [props.description=''] - The description of the achievement.
+ * @param {boolean} [props.isNew=false] - Whether the achievement is new.
+ * @returns {JSX.Element|null} The achievement component or null if it is not visible.
+ */
 const Achievement = ({ title, icon, description = '', isNew = false }) => {
   const [isVisible, setIsVisible] = useState(true);
 

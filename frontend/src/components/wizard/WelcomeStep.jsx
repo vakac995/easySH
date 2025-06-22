@@ -1,8 +1,25 @@
+/**
+ * @file WelcomeStep.jsx
+ * @description This component is the first step in the wizard, welcoming the user and asking for basic project information.
+ * @requires react
+ * @requires prop-types
+ * @requires framer-motion
+ * @requires ./Mascot
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import Mascot from './Mascot';
 
+/**
+ * A component that displays the welcome step of the wizard.
+ * @param {object} props - The component's props.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {Function} props.handleChange - A function to handle changes to the configuration.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The welcome step component.
+ */
 const WelcomeStep = ({ nextStep, handleChange, config }) => {
   const Continue = (e) => {
     e.preventDefault();
@@ -17,7 +34,8 @@ const WelcomeStep = ({ nextStep, handleChange, config }) => {
       </h2>
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         I'm your friendly assistant. Let's build something amazing together!
-      </p>      <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
+      </p>
+      <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         First, let's set up your project basics.
       </p>{' '}
       <div className='w-full max-w-lg mx-auto mb-6 space-y-4'>
