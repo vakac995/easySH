@@ -25,9 +25,15 @@ The project is a web-based tool for generating custom projects. It consists of a
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
 
+## What's New in Version 1.2.1
+
+🔧 **CORS Fix**: Resolved GitHub Pages ↔ Railway communication issues  
+✅ **Production Ready**: Frontend and backend now communicate seamlessly in production  
+🧪 **Testing Tools**: Added development mode CORS connectivity testing  
+
 ## What's New in Version 1.2.0
 
-✅ **Enhanced Configuration**: Frontend now collects all backend-required fields  
+✅ **Enhanced Configuration**: Frontend now collects all backend-required fields
 ✅ **Extended Wizard**: Added database configuration step for complete setup  
 ✅ **API Synchronization**: Fixed frontend-backend configuration mismatch  
 ✅ **Better UX**: Improved form validation and detailed configuration review

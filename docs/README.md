@@ -38,12 +38,14 @@ Guides for setting up and working with the codebase.
 
 - **[Development Guide](05-development/development-guide.md)** - Complete setup, workflow, and troubleshooting guide
 - **[Testing Checklist](05-development/gamification_testing_checklist.md)** - Manual testing procedures
+- **[CORS Deployment Guide](05-development/cors_deployment_guide.md)** - Step-by-step CORS fix deployment
 
 ### 🔧 [06 - Fixes & Improvements](06-fixes-and-improvements/)
 
 Changelog, bug fixes, and improvement history.
 
 - **[Changelog](06-fixes-and-improvements/changelog.md)** - Recent updates, known issues, and roadmap
+- **[CORS Fix Implementation](06-fixes-and-improvements/cors_fix_implementation.md)** - GitHub Pages ↔ Railway CORS resolution
 - **[Gamification Fixes](06-fixes-and-improvements/gamification_fixes_summary.md)** - Gamification system improvements
 - **[Layout Fixes](06-fixes-and-improvements/responsive_layout_fixes.md)** - Responsive design improvements
 - **[Design Improvements](06-fixes-and-improvements/tailwind_design_improvements.md)** - UI/UX enhancements

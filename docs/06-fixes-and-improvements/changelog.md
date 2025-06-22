@@ -2,6 +2,40 @@
 
 ## Recent Updates
 
+### Version 1.2.1 - CORS Configuration Fix
+
+**Date**: June 23, 2025
+
+#### 🔧 Critical Fix
+
+- **CORS Resolution**: Fixed cross-origin communication between GitHub Pages frontend and Railway backend
+- **Backend CORS Middleware**: Enhanced FastAPI CORS configuration with proper origin support
+- **Eliminated Conflicts**: Removed duplicate CORS headers from Railway configuration
+- **Testing Infrastructure**: Added comprehensive CORS testing utilities and endpoints
+
+#### 🛠️ Technical Changes
+
+- Updated `backend/main.py` with robust CORS middleware configuration
+- Added explicit OPTIONS handlers for all API endpoints (`/api/generate`, `/`, `/api/cors-test`)
+- Created `/api/cors-test` endpoint for debugging connectivity
+- Removed conflicting CORS headers from `railway.toml`
+- Added logging for better troubleshooting and monitoring
+
+#### 🎯 Frontend Improvements
+
+- Created `frontend/src/utils/corsTest.js` with comprehensive testing suite
+- Added development mode CORS testing interface in main App component
+- Real-time connectivity status and error reporting
+- Cross-browser compatibility verification tools
+
+#### 📚 Documentation
+
+- Added detailed CORS fix implementation guide
+- Created step-by-step deployment documentation
+- Updated main documentation index with CORS resources
+
+**Impact**: Resolves production deployment issues preventing users from generating projects via GitHub Pages interface.
+
 ### Version 1.2.0 - Frontend Configuration Synchronization
 
 **Date**: June 22, 2025
