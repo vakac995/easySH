@@ -1,8 +1,29 @@
+/**
+ * @file PowerLevel.jsx
+ * @description This component displays the user's power level as a progress bar with a title and percentage.
+ * It uses framer-motion for animations and displays different colors and titles based on the power level.
+ * @requires react
+ * @requires prop-types
+ * @requires framer-motion
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 
+/**
+ * A component that displays the user's power level.
+ * @param {object} props - The component's props.
+ * @param {number} props.level - The user's power level.
+ * @returns {JSX.Element} The power level component.
+ */
 const PowerLevel = ({ level }) => {
+  const percentage = Math.min(level, 100);
+
+  /**
+   * Returns a color for the power level bar based on the level.
+   * @param {number} level - The user's power level.
+   * @returns {string} The color for the power level bar.
+   */
   const getPowerColor = (level) => {
     if (level >= 80) return 'from-yellow-400 via-orange-500 to-red-500';
     if (level >= 60) return 'from-green-400 via-emerald-500 to-blue-500';
@@ -11,6 +32,11 @@ const PowerLevel = ({ level }) => {
     return 'from-gray-400 via-gray-500 to-gray-600';
   };
 
+  /**
+   * Returns a title for the power level based on the level.
+   * @param {number} level - The user's power level.
+   * @returns {string} The title for the power level.
+   */
   const getPowerTitle = (level) => {
     if (level >= 90) return 'Power Master ⚡';
     if (level >= 70) return 'Advanced User 🚀';
@@ -19,6 +45,11 @@ const PowerLevel = ({ level }) => {
     return 'Getting Started 🎯';
   };
 
+  /**
+   * Returns a background glow for the power level component based on the level.
+   * @param {number} level - The user's power level.
+   * @returns {string} The background glow for the power level component.
+   */
   const getBackgroundGlow = (level) => {
     if (level >= 80) return 'shadow-yellow-500/20';
     if (level >= 60) return 'shadow-green-500/20';
@@ -48,7 +79,7 @@ const PowerLevel = ({ level }) => {
         <motion.div
           className={`h-full bg-gradient-to-r ${getPowerColor(level)} rounded-full shadow-xl relative`}
           initial={{ width: 0 }}
-          animate={{ width: `${level}%` }}
+          animate={{ width: `${percentage}%` }}
           transition={{ duration: 1.2, ease: 'easeOut' }}
         >
           {/* Animated shine effect */}
@@ -94,7 +125,7 @@ const PowerLevel = ({ level }) => {
             animate={{ scale: level >= 100 ? [1, 1.1, 1] : 1 }}
             transition={{ duration: 0.5, repeat: level >= 100 ? Infinity : 0, repeatDelay: 2 }}
           >
-            {level}%
+            {percentage}%
           </motion.span>
           {level >= 100 && (
             <motion.span

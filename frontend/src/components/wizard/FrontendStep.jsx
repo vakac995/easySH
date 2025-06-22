@@ -1,6 +1,23 @@
+/**
+ * @file FrontendStep.jsx
+ * @description This component is a step in the wizard that allows the user to configure the frontend.
+ * It includes options for selecting the frontend framework, UI library, and other additional options.
+ * @requires react
+ * @requires prop-types
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * A component that allows the user to configure the frontend.
+ * @param {object} props - The component's props.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.handleChange - A function to handle changes to the configuration.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The frontend step component.
+ */
 const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
   const Continue = (e) => {
     e.preventDefault();
@@ -52,33 +69,14 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
         </select>
       </div>
 
-      <div className='mb-6 space-y-4'>
-        <h3 className='text-xl font-bold text-gray-700 dark:text-gray-200'>
-          Additional Options
-        </h3>
-        <div className='flex flex-wrap gap-4 justify-center'>
-          <label className='flex items-center text-lg text-gray-700 dark:text-gray-200'>
-            <input
-              type='checkbox'
-              checked={config.frontend.includeExamplePages}
-              onChange={handleChange('frontend.includeExamplePages')}
-              className='mr-2 h-5 w-5 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
-            />{' '}
-            Include Example Pages
-          </label>
-          <label className='flex items-center text-lg text-gray-700 dark:text-gray-200'>
-            <input
-              type='checkbox'
-              checked={config.frontend.includeHusky}
-              onChange={handleChange('frontend.includeHusky')}
-              className='mr-2 h-5 w-5 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
-            />{' '}
-            Include Husky (Git Hooks)
-          </label>
-        </div>
-      </div>
+      <textarea
+        value={config.frontend.projectDescription}
+        onChange={handleChange('frontend.projectDescription')}
+        placeholder="Enter frontend description"
+        className="w-full p-3 mt-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+      />
 
-      <div className='flex justify-between mt-8'>
+      <div className="mt-6 flex justify-between">
         <button
           onClick={prevStep}
           className='bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105'

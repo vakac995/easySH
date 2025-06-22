@@ -1,9 +1,21 @@
+/**
+ * @file ReviewStep.jsx
+ * @description This component is a step in the wizard that allows the user to review their configuration before generating the project.
+ * It also handles the submission of the configuration to the backend API.
+ * @requires react
+ * @requires prop-types
+ * @requires ../../config/api
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { API_BASE_URL } from '../../config/api';
 
-// This helper function transforms the frontend's wizard state into the
-// exact JSON structure expected by the backend's Pydantic models.
+/**
+ * Transforms the configuration from the frontend's state to the format expected by the backend API.
+ * @param {object} config - The configuration from the frontend's state.
+ * @returns {object} The transformed configuration.
+ */
 const transformConfigForApi = (config) => {
   const { projectName, backend, frontend, modules } = config;
 
@@ -55,9 +67,19 @@ const transformConfigForApi = (config) => {
   };
 };
 
+/**
+ * A component that allows the user to review their configuration.
+ * @param {object} props - The component's props.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The review step component.
+ */
 const ReviewStep = ({ prevStep, nextStep, config }) => {
   const submit = async () => {
-    const apiPayload = transformConfigForApi(config);    try {
+    const apiPayload = transformConfigForApi(config);
+
+    try {
       const response = await fetch(`${API_BASE_URL}/api/generate`, {
         method: 'POST',
         headers: {
@@ -94,7 +116,8 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
       </h2>
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         One last look before we generate your project!
-      </p>      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
+      </p>{' '}
+      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
         <div className='mb-6'>
           <h4 className='text-xl font-bold border-b-2 border-blue-500 pb-2 mb-4 text-gray-800 dark:text-white'>
             Project
@@ -142,10 +165,12 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
             <strong>UI Library:</strong> {config.frontend.uiLibrary}
           </p>
           <p className='text-gray-700 dark:text-gray-300'>
-            <strong>Example Pages:</strong> {config.frontend.includeExamplePages ? 'Included' : 'Not included'}
+            <strong>Example Pages:</strong>{' '}
+            {config.frontend.includeExamplePages ? 'Included' : 'Not included'}
           </p>
           <p className='text-gray-700 dark:text-gray-300'>
-            <strong>Husky (Git Hooks):</strong> {config.frontend.includeHusky ? 'Included' : 'Not included'}
+            <strong>Husky (Git Hooks):</strong>{' '}
+            {config.frontend.includeHusky ? 'Included' : 'Not included'}
           </p>
         </div>
 
@@ -160,11 +185,12 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
               )}
             </ul>
           ) : (
-            <p className='text-gray-700 dark:text-gray-300 italic'>No additional modules selected</p>
+            <p className='text-gray-700 dark:text-gray-300 italic'>
+              No additional modules selected
+            </p>
           )}
         </div>
       </div>
-
       <div className='flex justify-between mt-8'>
         <button
           onClick={prevStep}

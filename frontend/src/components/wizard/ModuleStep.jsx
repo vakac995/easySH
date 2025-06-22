@@ -1,6 +1,22 @@
+/**
+ * @file ModuleStep.jsx
+ * @description This component is a step in the wizard that allows the user to select additional modules to include in the project.
+ * @requires react
+ * @requires prop-types
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * A component that allows the user to select additional modules.
+ * @param {object} props - The component's props.
+ * @param {Function} props.nextStep - A function to go to the next step in the wizard.
+ * @param {Function} props.prevStep - A function to go to the previous step in the wizard.
+ * @param {Function} props.handleChange - A function to handle changes to the configuration.
+ * @param {object} props.config - The current configuration.
+ * @returns {JSX.Element} The module step component.
+ */
 const ModuleStep = ({ nextStep, prevStep, handleChange, config }) => {
   return (
     <div className='text-center p-4'>

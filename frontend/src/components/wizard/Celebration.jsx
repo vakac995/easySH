@@ -1,7 +1,24 @@
+/**
+ * @file Celebration.jsx
+ * @description This component displays a celebration animation with confetti and fireworks.
+ * It is used to celebrate the completion of the wizard or other special events.
+ * @requires react
+ * @requires framer-motion
+ * @requires prop-types
+ */
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+/**
+ * A component that displays a single piece of confetti.
+ * @param {object} props - The component's props.
+ * @param {number} props.delay - The delay before the confetti appears.
+ * @param {string} props.color - The color of the confetti.
+ * @param {string} props.shape - The shape of the confetti.
+ * @returns {JSX.Element} The confetti piece component.
+ */
 const ConfettiPiece = ({ delay, color, shape }) => (
   <motion.div
     className={`absolute ${shape === 'star' ? 'w-4 h-4' : 'w-3 h-3'} ${color} ${shape === 'star' ? '' : 'rounded-full'}`}
@@ -35,6 +52,12 @@ ConfettiPiece.propTypes = {
   shape: PropTypes.string,
 };
 
+/**
+ * A component that displays a firework.
+ * @param {object} props - The component's props.
+ * @param {number} props.delay - The delay before the firework appears.
+ * @returns {JSX.Element} The firework component.
+ */
 const Firework = ({ delay }) => (
   <motion.div
     className='absolute'
@@ -78,6 +101,10 @@ Firework.propTypes = {
   delay: PropTypes.number.isRequired,
 };
 
+/**
+ * A component that displays a celebration animation.
+ * @returns {JSX.Element} The celebration component.
+ */
 const Celebration = () => {
   const containerVariants = {
     hidden: { opacity: 0 },

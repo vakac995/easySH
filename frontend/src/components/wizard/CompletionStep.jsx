@@ -1,7 +1,23 @@
+/**
+ * @file CompletionStep.jsx
+ * @description This component is the final step in the wizard, displayed after the project has been generated.
+ * It congratulates the user and provides instructions on what to do next.
+ * @requires react
+ * @requires prop-types
+ * @requires framer-motion
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 
+/**
+ * A component that displays the completion step of the wizard.
+ * @param {object} props - The component's props.
+ * @param {object} props.config - The final configuration of the project.
+ * @param {Function} props.startOver - A function to start the wizard over.
+ * @returns {JSX.Element} The completion step component.
+ */
 const CompletionStep = ({ config, startOver }) => {
   return (
     <motion.div

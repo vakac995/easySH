@@ -1,6 +1,17 @@
+/**
+ * @file Mascot.jsx
+ * @description This component displays an animated mascot.
+ * It uses framer-motion to create a breathing animation.
+ * @requires react
+ * @requires framer-motion
+ */
 import React from 'react';
 import { motion } from 'framer-motion';
 
+/**
+ * A component that displays an animated mascot.
+ * @returns {JSX.Element} The mascot component.
+ */
 const Mascot = () => {
   const bodyVariants = {
     breathing: {
