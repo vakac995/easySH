@@ -2,9 +2,8 @@
 const config = {
   development: {
     apiBaseUrl: 'http://localhost:8000',
-  },
-  production: {
-    apiBaseUrl: 'http://easysh-production.up.railway.app',
+  },  production: {
+    apiBaseUrl: 'https://easysh-production.up.railway.app',
   },
 };
 
