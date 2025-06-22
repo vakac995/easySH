@@ -40,7 +40,6 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
 
@@ -126,31 +125,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- Constants ---
-# CORS_METHODS = "GET, POST, PUT, DELETE, OPTIONS"  <- This is no longer needed.
-
-# --- Simple CORS Solution ---
-# Centralizing CORS configuration in the middleware is the standard practice.
-# This avoids conflicts with hosting platform proxies like Railway.
-
-# Add the production frontend URL to the list of allowed origins
-# This will allow the frontend hosted on GitHub Pages to communicate with the backend.
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://vakac995.github.io",  # Production frontend
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    # Expose Content-Disposition so the browser can access the filename for download.
-    expose_headers=["Content-Disposition"],
-)
-
+# --- CORS Configuration Removed ---
+# All CORS headers are now managed by the railway.toml file to avoid conflicts
+# with the Railway proxy.
 
 # --- Jinja2 Template Engine Setup ---
 # This assumes a 'templates' directory exists in the same location as main.py
