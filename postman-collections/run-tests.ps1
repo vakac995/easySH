@@ -84,6 +84,7 @@ function Run-LoadTests {
         "--timeout-request", "30000",
         "--delay-request", "50",
         "--iteration-count", "5",
+        "--bail",
         "--color", "on"
     )
     
