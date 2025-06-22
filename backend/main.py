@@ -116,8 +116,7 @@ class MasterConfig(BaseModel):
     backend: BackendConfig = Field(default_factory=BackendConfig)
     frontend: FrontendConfig = Field(default_factory=FrontendConfig)
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = {"validate_by_name": True}
 
 
 # --- FastAPI App Initialization ---

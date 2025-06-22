@@ -4,8 +4,9 @@ import PropTypes from 'prop-types';
 // This helper function transforms the frontend's wizard state into the
 // exact JSON structure expected by the backend's Pydantic models.
 const transformConfigForApi = (config) => {
-  const { projectName, modules } = config;
+  const { projectName, backend, frontend, modules } = config;
 
+  // Transform modules to the expected format for frontend only
   const frontendModules = Object.entries(modules)
     .filter(([, enabled]) => enabled)
     .map(([id]) => ({
@@ -14,24 +15,40 @@ const transformConfigForApi = (config) => {
       permissions: 'read,write',
     }));
 
+  // Convert features to the expected format for frontend only
+  const frontendFeatures = Object.entries(modules)
+    .filter(([, enabled]) => enabled)
+    .map(([id]) => ({
+      id: id,
+    }));
   return {
     global: {
       projectName: projectName,
     },
     backend: {
-      include: true,
-      projectName: `${projectName}-backend`,
-      // The UI doesn't currently configure these, so we rely on backend defaults.
+      include: backend.include,
+      projectName: backend.projectName || `${projectName}-backend`,
+      projectDescription: backend.projectDescription,
+      projectVersion: backend.projectVersion,
+      dbHost: backend.dbHost,
+      dbPort: parseInt(backend.dbPort),
+      dbName: backend.dbName,
+      dbUser: backend.dbUser,
+      dbPassword: backend.dbPassword,
+      pgAdminEmail: backend.pgAdminEmail,
+      pgAdminPassword: backend.pgAdminPassword,
+      debug: backend.debug,
+      logLevel: backend.logLevel,
     },
     frontend: {
-      include: true,
-      projectName: `${projectName}-frontend`,
-      includeExamplePages: true,
-      includeHusky: false, // Not configured in UI
+      include: frontend.include,
+      projectName: frontend.projectName || `${projectName}-frontend`,
+      includeExamplePages: frontend.includeExamplePages,
+      includeHusky: frontend.includeHusky,
       moduleSystem: {
         include: frontendModules.length > 0,
         modules: frontendModules,
-        features: [], // Not configured in UI
+        features: frontendFeatures,
       },
     },
   };
@@ -77,15 +94,19 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
       </h2>
       <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
         One last look before we generate your project!
-      </p>
-
-      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
+      </p>      <div className='text-left bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mt-6'>
         <div className='mb-6'>
           <h4 className='text-xl font-bold border-b-2 border-blue-500 pb-2 mb-4 text-gray-800 dark:text-white'>
             Project
           </h4>
           <p className='text-gray-700 dark:text-gray-300'>
             <strong>Name:</strong> {config.projectName}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Description:</strong> {config.backend.projectDescription}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Version:</strong> {config.backend.projectVersion}
           </p>
         </div>
 
@@ -99,6 +120,15 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
           <p className='text-gray-700 dark:text-gray-300'>
             <strong>Database:</strong> {config.backend.database}
           </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Database Name:</strong> {config.backend.dbName}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Database User:</strong> {config.backend.dbUser}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Debug Mode:</strong> {config.backend.debug ? 'Enabled' : 'Disabled'}
+          </p>
         </div>
 
         <div className='mb-6'>
@@ -111,17 +141,27 @@ const ReviewStep = ({ prevStep, nextStep, config }) => {
           <p className='text-gray-700 dark:text-gray-300'>
             <strong>UI Library:</strong> {config.frontend.uiLibrary}
           </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Example Pages:</strong> {config.frontend.includeExamplePages ? 'Included' : 'Not included'}
+          </p>
+          <p className='text-gray-700 dark:text-gray-300'>
+            <strong>Husky (Git Hooks):</strong> {config.frontend.includeHusky ? 'Included' : 'Not included'}
+          </p>
         </div>
 
         <div>
           <h4 className='text-xl font-bold border-b-2 border-blue-500 pb-2 mb-4 text-gray-800 dark:text-white'>
             Modules
           </h4>
-          <ul className='list-disc list-inside text-gray-700 dark:text-gray-300'>
-            {Object.entries(config.modules).map(([key, value]) =>
-              value ? <li key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</li> : null,
-            )}
-          </ul>
+          {Object.entries(config.modules).some(([, value]) => value) ? (
+            <ul className='list-disc list-inside text-gray-700 dark:text-gray-300'>
+              {Object.entries(config.modules).map(([key, value]) =>
+                value ? <li key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</li> : null,
+              )}
+            </ul>
+          ) : (
+            <p className='text-gray-700 dark:text-gray-300 italic'>No additional modules selected</p>
+          )}
         </div>
       </div>
 

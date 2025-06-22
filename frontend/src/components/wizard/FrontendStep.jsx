@@ -32,9 +32,7 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
             The only option, for now!
           </span>
         </div>
-      </div>
-
-      <div className='mb-6'>
+      </div>      <div className='mb-6'>
         <label
           htmlFor='ui-library-select'
           className='block text-xl font-bold mb-2 text-gray-700 dark:text-gray-200'
@@ -52,6 +50,32 @@ const FrontendStep = ({ nextStep, prevStep, handleChange, config }) => {
           <option value='tailwindcss'>Tailwind CSS</option>
           <option value='material-ui'>Material-UI</option>
         </select>
+      </div>
+
+      <div className='mb-6 space-y-4'>
+        <h3 className='text-xl font-bold text-gray-700 dark:text-gray-200'>
+          Additional Options
+        </h3>
+        <div className='flex flex-wrap gap-4 justify-center'>
+          <label className='flex items-center text-lg text-gray-700 dark:text-gray-200'>
+            <input
+              type='checkbox'
+              checked={config.frontend.includeExamplePages}
+              onChange={handleChange('frontend.includeExamplePages')}
+              className='mr-2 h-5 w-5 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
+            />{' '}
+            Include Example Pages
+          </label>
+          <label className='flex items-center text-lg text-gray-700 dark:text-gray-200'>
+            <input
+              type='checkbox'
+              checked={config.frontend.includeHusky}
+              onChange={handleChange('frontend.includeHusky')}
+              className='mr-2 h-5 w-5 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
+            />{' '}
+            Include Husky (Git Hooks)
+          </label>
+        </div>
       </div>
 
       <div className='flex justify-between mt-8'>

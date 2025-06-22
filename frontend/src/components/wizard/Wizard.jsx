@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import WelcomeStep from './WelcomeStep';
 import BackendStep from './BackendStep';
+import DatabaseConfigStep from './DatabaseConfigStep';
 import FrontendStep from './FrontendStep';
 import ModuleStep from './ModuleStep';
 import ReviewStep from './ReviewStep';
@@ -22,14 +23,33 @@ import {
 const initialConfig = {
   projectName: 'new-project-name',
   backend: {
+    include: true,
     framework: 'fastapi',
     database: 'postgresql',
-    services: [],
+    projectName: '',
+    projectDescription: 'A robust backend service.',
+    projectVersion: '0.1.0',
+    dbHost: 'postgres',
+    dbPort: 5432,
+    dbName: 'app_db',
+    dbUser: 'db_user',
+    dbPassword: 'secure_password_123',
+    pgAdminEmail: 'admin@example.com',
+    pgAdminPassword: 'admin123',
+    debug: false,
+    logLevel: 'INFO',
+    modules: [],
+    features: [],
   },
   frontend: {
+    include: true,
     framework: 'react',
+    projectName: '',
     uiLibrary: 'none',
-    pages: [],
+    includeExamplePages: true,
+    includeHusky: false,
+    modules: [],
+    features: [],
   },
   modules: {
     authentication: false,
@@ -190,7 +210,6 @@ const Wizard = () => {
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
-
   const handleChange = (path) => (e) => {
     const { value, type, checked } = e.target;
     const keys = path.split('.');
@@ -205,10 +224,15 @@ const Wizard = () => {
 
       current[keys[keys.length - 1]] = type === 'checkbox' ? checked : value;
 
+      // Auto-update backend and frontend project names when main project name changes
+      if (path === 'projectName') {
+        tempConfig.backend.projectName = `${value}-backend`;
+        tempConfig.frontend.projectName = `${value}-frontend`;
+      }
+
       return tempConfig;
     });
   };
-
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -224,7 +248,7 @@ const Wizard = () => {
         );
       case 3:
         return (
-          <FrontendStep
+          <DatabaseConfigStep
             nextStep={nextStep}
             prevStep={prevStep}
             handleChange={handleChange}
@@ -233,7 +257,7 @@ const Wizard = () => {
         );
       case 4:
         return (
-          <ModuleStep
+          <FrontendStep
             nextStep={nextStep}
             prevStep={prevStep}
             handleChange={handleChange}
@@ -241,6 +265,15 @@ const Wizard = () => {
           />
         );
       case 5:
+        return (
+          <ModuleStep
+            nextStep={nextStep}
+            prevStep={prevStep}
+            handleChange={handleChange}
+            config={config}
+          />
+        );
+      case 6:
         return <ReviewStep nextStep={triggerCelebration} prevStep={prevStep} config={config} />;
       default:
         return null;
@@ -264,10 +297,8 @@ const Wizard = () => {
 
         <div className='mb-6'>
           <GamificationPanel level={powerLevel} achievements={achievements} config={config} />
-        </div>
-
-        <Card>
-          <ProgressBar currentStep={step} totalSteps={5} />
+        </div>        <Card>
+          <ProgressBar currentStep={step} totalSteps={6} />
           <AnimatePresence mode='wait'>
             <AnimatedStep key={step}>{renderStep()}</AnimatedStep>
           </AnimatePresence>
