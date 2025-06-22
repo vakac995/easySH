@@ -191,13 +191,12 @@ Templates use the `config` object to conditionally generate content:
 version: '3.8'
 
 services:
-  backend:
-    build: .
+  backend:    build: .
     container_name: { { config.backend.projectName } }
     environment:
-      - DATABASE_URL=postgresql://{{ config.backend.dbUser }}:{{ config.backend.dbPassword }}@{{ config.backend.dbHost }}:{{ config.backend.dbPort }}/{{ config.backend.dbName }}
-      - LOG_LEVEL={{ config.backend.logLevel }}
-      - DEBUG={{ config.backend.debug }}
+      - DATABASE_URL=postgresql://{% raw %}{{ config.backend.dbUser }}:{{ config.backend.dbPassword }}@{{ config.backend.dbHost }}:{{ config.backend.dbPort }}/{{ config.backend.dbName }}{% endraw %}
+      - LOG_LEVEL={% raw %}{{ config.backend.logLevel }}{% endraw %}
+      - DEBUG={% raw %}{{ config.backend.debug }}{% endraw %}
     depends_on:
       - postgres
 
@@ -206,10 +205,9 @@ services:
     container_name: { { config.backend.dbHost } }
     environment:
       POSTGRES_DB: { { config.backend.dbName } }
-      POSTGRES_USER: { { config.backend.dbUser } }
-      POSTGRES_PASSWORD: { { config.backend.dbPassword } }
+      POSTGRES_USER: { { config.backend.dbUser } }      POSTGRES_PASSWORD: { { config.backend.dbPassword } }
     ports:
-      - '{{ config.backend.dbPort }}:5432'
+      - '{% raw %}{{ config.backend.dbPort }}{% endraw %}:5432'
 
   pgadmin:
     image: dpage/pgadmin4
@@ -222,7 +220,7 @@ services:
 
 ```json
 {
-  "name": "{{ config.frontend.projectName }}",
+  "name": "{% raw %}{{ config.frontend.projectName }}{% endraw %}",
   "version": "0.0.0",
   "dependencies": {
     "react": "^18.2.0",

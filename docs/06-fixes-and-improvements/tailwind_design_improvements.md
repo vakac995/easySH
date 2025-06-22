@@ -191,12 +191,11 @@ The easySH project generator has been successfully enhanced with improved gamifi
       <div className='text-sm text-fibank-gray-500'>Complete</div>
     </div>
   </div>
-
   {/* Enhanced Progress Bar */}
   <div className='relative h-3 bg-fibank-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
     <div
       className='absolute inset-y-0 left-0 bg-gradient-to-r from-fibank-primary to-fibank-accent rounded-full transition-all duration-1000 ease-out'
-      style={{ width: `${level}%` }}
+      style={% raw %}{{ width: `${level}%` }}{% endraw %}
     />
     <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse' />
   </div>

@@ -131,8 +131,8 @@ All animations are powered by Framer Motion for smooth, performant transitions:
 
 // Button animations
 <motion.button
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
+  whileHover={% raw %}{{ scale: 1.05 }}{% endraw %}
+  whileTap={% raw %}{{ scale: 0.95 }}{% endraw %}
 >
   Continue
 </motion.button>
