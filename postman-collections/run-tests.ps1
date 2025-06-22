@@ -31,8 +31,8 @@ try {
     exit 1
 }
 
-# Function to run tests
-function Run-Tests {
+# Helper function to invoke Newman
+function Invoke-Newman {
     param(
         [string]$EnvName,
         [string]$EnvFile,
