@@ -67,13 +67,13 @@ railway deploy
 #### Test Endpoints Manually
 ```bash
 # Test health endpoint
-curl https://easysH-production-up.railway.app/
+curl https://easysh-production-up.railway.app/
 
 # Expected response:
 # {"status":"ok","message":"Project Generation API is running."}
 
 # Test new CORS endpoint  
-curl https://easysH-production-up.railway.app/api/cors-test
+curl https://easysh-production-up.railway.app/api/cors-test
 
 # Expected response:
 # {"status":"success","message":"CORS is working correctly","timestamp":"2025-06-23T00:00:00Z"}
@@ -82,7 +82,7 @@ curl https://easysH-production-up.railway.app/api/cors-test
 #### Verify CORS Headers
 ```bash
 # Test CORS headers with OPTIONS request
-curl -X OPTIONS https://easysH-production-up.railway.app/api/generate \
+curl -X OPTIONS https://easysh-production-up.railway.app/api/generate \
   -H "Origin: https://vakac995.github.io" \
   -H "Access-Control-Request-Method: POST" \
   -H "Access-Control-Request-Headers: Content-Type" \
@@ -173,7 +173,7 @@ Test in multiple browsers to ensure compatibility:
 1. **Verify Railway Deployment**: 
    ```bash
    # Check if new backend is deployed
-   curl https://easysH-production-up.railway.app/api/cors-test
+   curl https://easysh-production-up.railway.app/api/cors-test
    ```
 
 2. **Check GitHub Pages URL**:
@@ -189,7 +189,7 @@ Test in multiple browsers to ensure compatibility:
 **Solution**:
 ```bash
 # Test OPTIONS endpoint directly
-curl -X OPTIONS https://easysH-production-up.railway.app/api/generate -v
+curl -X OPTIONS https://easysh-production-up.railway.app/api/generate -v
 
 # Should return 200, not 405
 ```

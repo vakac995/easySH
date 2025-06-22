@@ -4,7 +4,7 @@ const config = {
     apiBaseUrl: 'http://localhost:8000',
   },
   production: {
-    apiBaseUrl: 'https://easysH-production-up.railway.app',
+    apiBaseUrl: 'https://easysh-production-up.railway.app',
   },
 };
 
