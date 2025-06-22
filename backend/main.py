@@ -38,8 +38,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
@@ -126,20 +125,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- CORS Middleware Setup ---
-# This allows the frontend (running on a different port) to communicate with the backend.
-# Temporary fix: Allow all origins to debug CORS issues
+# --- CORS Headers Setup ---
+# Manual CORS handling due to Railway proxy conflicts
 
-origins = ["*"]  # Allow all origins temporarily for debugging
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=False,  # Must be False when using allow_origins=["*"]
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
+@app.options("/api/generate")
+async def options_generate():
+    """Handle preflight CORS requests"""
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Expose-Headers": "*",
+    }
+    return Response(headers=headers)
 
 # --- Jinja2 Template Engine Setup ---
 # This assumes a 'templates' directory exists in the same location as main.py
@@ -239,11 +237,15 @@ async def generate_project(config: MasterConfig):
             )
 
     # Rewind buffer to the beginning
-    zip_buffer.seek(0)
-
-    # Set headers for file download
+    zip_buffer.seek(0)    # Set headers for file download and CORS
     zip_filename = f"{config.global_config.projectName}.zip"
-    headers = {"Content-Disposition": f'attachment; filename="{zip_filename}"'}
+    headers = {
+        "Content-Disposition": f'attachment; filename="{zip_filename}"',
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Expose-Headers": "*",
+    }
 
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
 
