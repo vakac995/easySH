@@ -1,6 +1,6 @@
 # easySH Project Generator
 
-The project is a web-based tool for generating custom projects. It consists of a frontend built with HTML, CSS, and vanilla JavaScript, and a backend powered by FastAPI.
+The project is a web-based tool for generating custom projects. It consists of a frontend built with React and Vite, and a backend powered by FastAPI and Docker.
 
 ## Project Structure
 
@@ -8,29 +8,46 @@ The project is a web-based tool for generating custom projects. It consists of a
   - `main.py`: The main application file.
   - `requirements.txt`: Python dependencies.
   - `templates/`: Jinja2 templates for generating project files.
-- `frontend/`: Contains the frontend application.
-  - `index.html`: The main HTML file.
+- `frontend/`: Contains the React frontend application.
+  - `src/`: The main source code for the React application.
+  - `package.json`: Frontend dependencies and scripts.
 - `scripts/`: Contains the original shell scripts that were used as a reference.
 - `docs/`: Contains project documentation.
 
 ## How to Run
 
-1.  **Set up the Python environment:**
+### Backend
+
+The backend is designed to be run with Docker.
+
+1.  **Build and run the Docker containers:**
 
     ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    pip install -r backend/requirements.txt
+    docker-compose up --build
     ```
 
-2.  **Start the backend server:**
+2.  The backend will be available at `http://localhost:8000`.
+
+### Frontend
+
+1.  **Navigate to the frontend directory:**
 
     ```bash
-    uvicorn backend.main:app --reload
+    cd frontend
     ```
 
-3.  **Open the frontend:**
+2.  **Install dependencies:**
 
-    Open the `frontend/index.html` file in web browser.
+    ```bash
+    npm install
+    ```
+
+3.  **Start the development server:**
+
+    ```bash
+    npm run dev
+    ```
+
+4.  The frontend will be available at `http://localhost:5173`.
 
 Use this web interface to configure and generate custom projects.
