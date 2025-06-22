@@ -31,15 +31,17 @@ app.add_middleware(
 The backend uses Pydantic models for request validation and type safety:
 
 #### Global Configuration
+
 ```python
 class GlobalConfig(BaseModel):
     projectName: str = Field(
-        ..., min_length=1, 
+        ..., min_length=1,
         description="Overall project name for the root folder."
     )
 ```
 
 #### Backend Configuration
+
 ```python
 class BackendConfig(BaseModel):
     include: bool = False
@@ -58,6 +60,7 @@ class BackendConfig(BaseModel):
 ```
 
 #### Frontend Configuration
+
 ```python
 class FrontendConfig(BaseModel):
     include: bool = False
@@ -68,6 +71,7 @@ class FrontendConfig(BaseModel):
 ```
 
 #### Module System
+
 ```python
 class FrontendModule(BaseModel):
     id: str
@@ -146,28 +150,30 @@ backend/templates/
 ### Template Processing
 
 #### Jinja2 Environment Setup
+
 ```python
 template_dir = Path(__file__).parent / "templates"
 jinja_env = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
 ```
 
 #### Template Rendering Process
+
 ```python
 def _process_template_directory(zip_file, config, dir_name, template_dir, jinja_env):
     """Processes a single directory of templates."""
     source_dir = template_dir / dir_name
-    
+
     for root, _, files in os.walk(source_dir):
         template_root_path = Path(root)
         for filename in files:
             if not filename.endswith(".jinja2"):
                 continue
-                
+
             # Load and render template
             template_name = str(template_path.relative_to(template_dir)).replace("\\", "/")
             template = jinja_env.get_template(template_name)
             rendered_content = template.render(config=config.model_dump(by_alias=True))
-            
+
             # Add to ZIP archive
             final_filename = filename.removesuffix(".jinja2")
             zip_path = Path(project_name) / project_part_name / relative_path / final_filename
@@ -179,6 +185,7 @@ def _process_template_directory(zip_file, config, dir_name, template_dir, jinja_
 Templates use the `config` object to conditionally generate content:
 
 #### Example: Docker Compose Template
+
 ```yaml
 # docker-compose.yml.jinja2
 version: '3.8'
@@ -186,7 +193,7 @@ version: '3.8'
 services:
   backend:
     build: .
-    container_name: {{ config.backend.projectName }}
+    container_name: { { config.backend.projectName } }
     environment:
       - DATABASE_URL=postgresql://{{ config.backend.dbUser }}:{{ config.backend.dbPassword }}@{{ config.backend.dbHost }}:{{ config.backend.dbPort }}/{{ config.backend.dbName }}
       - LOG_LEVEL={{ config.backend.logLevel }}
@@ -196,22 +203,23 @@ services:
 
   postgres:
     image: postgres:13
-    container_name: {{ config.backend.dbHost }}
+    container_name: { { config.backend.dbHost } }
     environment:
-      POSTGRES_DB: {{ config.backend.dbName }}
-      POSTGRES_USER: {{ config.backend.dbUser }}
-      POSTGRES_PASSWORD: {{ config.backend.dbPassword }}
+      POSTGRES_DB: { { config.backend.dbName } }
+      POSTGRES_USER: { { config.backend.dbUser } }
+      POSTGRES_PASSWORD: { { config.backend.dbPassword } }
     ports:
-      - "{{ config.backend.dbPort }}:5432"
+      - '{{ config.backend.dbPort }}:5432'
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: {{ config.backend.pgAdminEmail }}
-      PGADMIN_DEFAULT_PASSWORD: {{ config.backend.pgAdminPassword }}
+      PGADMIN_DEFAULT_EMAIL: { { config.backend.pgAdminEmail } }
+      PGADMIN_DEFAULT_PASSWORD: { { config.backend.pgAdminPassword } }
 ```
 
 #### Example: Package.json Template
+
 ```json
 {
   "name": "{{ config.frontend.projectName }}",
@@ -225,6 +233,7 @@ services:
 ```
 
 #### Example: Conditional Frontend Features
+
 ```typescript
 // App.tsx.jinja2
 import React from 'react';
@@ -249,6 +258,7 @@ function App() {
 ## API Endpoints
 
 ### Health Check
+
 ```python
 @app.get("/", tags=["Health Check"])
 def read_root():
@@ -257,34 +267,35 @@ def read_root():
 ```
 
 ### Project Generation
+
 ```python
 @app.post("/api/generate", tags=["Generation"])
 async def generate_project(config: MasterConfig):
     """Accepts a JSON configuration and returns a zipped project archive."""
-    
+
     # Validation
     if not config.backend.include and not config.frontend.include:
         raise HTTPException(
             status_code=400,
             detail="At least one part must be included."
         )
-    
+
     # Generate ZIP archive
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         # Process backend templates
         if config.backend.include:
             _process_template_directory(zip_file, config, "backend", template_dir, jinja_env)
-        
-        # Process frontend templates  
+
+        # Process frontend templates
         if config.frontend.include:
             _process_template_directory(zip_file, config, "frontend", template_dir, jinja_env)
-            
+
         # Add setup script
         setup_template = jinja_env.get_template("setup_environment.sh.jinja2")
         rendered_setup = setup_template.render(config=config.model_dump(by_alias=True))
         zip_file.writestr(f"{config.global_config.projectName}/setup_environment.sh", rendered_setup)
-    
+
     # Return ZIP file
     zip_buffer.seek(0)
     headers = {"Content-Disposition": f'attachment; filename="{config.global_config.projectName}.zip"'}
@@ -327,17 +338,20 @@ The generated `setup_environment.sh` script provides:
 ## Security Features
 
 ### Input Validation
+
 - **Pydantic Models**: Strict type checking and validation
 - **SQL Injection Prevention**: No direct SQL execution from user input
 - **Path Traversal Protection**: Template paths are validated and sandboxed
 - **File System Isolation**: No arbitrary file system access
 
 ### Template Security
+
 - **Sandboxed Execution**: Jinja2 templates run in restricted environment
 - **No Code Execution**: Templates cannot execute arbitrary Python code
 - **Input Sanitization**: All user input is properly escaped
 
 ### Network Security
+
 - **CORS Configuration**: Properly configured cross-origin resource sharing
 - **Request Size Limits**: Prevent large request attacks
 - **Rate Limiting**: Can be added for production environments
@@ -345,11 +359,13 @@ The generated `setup_environment.sh` script provides:
 ## Performance Optimizations
 
 ### Memory Management
+
 - **Streaming Responses**: ZIP files are streamed directly to client
 - **In-Memory Processing**: No temporary file storage required
 - **Efficient Template Loading**: Templates are cached by Jinja2
 
 ### Scalability
+
 - **Stateless Design**: No server-side state storage
 - **Horizontal Scaling**: Multiple instances can run simultaneously
 - **Resource Efficiency**: Minimal CPU and memory usage per request
@@ -357,6 +373,7 @@ The generated `setup_environment.sh` script provides:
 ## Development Setup
 
 ### Requirements
+
 ```
 fastapi
 uvicorn[standard]
@@ -366,12 +383,14 @@ python-multipart
 ```
 
 ### Running in Development
+
 ```bash
 cd backend
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 ### Docker Development
+
 ```bash
 cd backend
 docker build -t easysh-backend .
@@ -381,6 +400,7 @@ docker run -p 8000:8000 easysh-backend
 ## Error Handling
 
 ### Validation Errors
+
 ```python
 # Automatic Pydantic validation
 {
@@ -395,6 +415,7 @@ docker run -p 8000:8000 easysh-backend
 ```
 
 ### Template Errors
+
 ```python
 try:
     template = jinja_env.get_template(template_name)
@@ -408,6 +429,7 @@ except Exception as e:
 ```
 
 ### ZIP Generation Errors
+
 - **Memory Limits**: Handling large projects
 - **File Corruption**: Validation of generated content
 - **Network Interruption**: Graceful handling of connection issues
@@ -415,6 +437,7 @@ except Exception as e:
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Template Versioning**: Multiple template versions for different project types
 2. **Custom Templates**: User-uploadable template system
 3. **Database Support**: Multiple database options (MySQL, SQLite, MongoDB)
@@ -422,12 +445,14 @@ except Exception as e:
 5. **CI/CD Integration**: GitHub Actions and deployment configurations
 
 ### Performance Improvements
+
 1. **Template Caching**: Advanced caching strategies
 2. **Compression**: Better ZIP compression algorithms
 3. **Parallel Processing**: Concurrent template rendering
 4. **Resource Pooling**: Connection and resource pooling
 
 ### Security Enhancements
+
 1. **Authentication**: User authentication and authorization
 2. **Audit Logging**: Comprehensive request logging
 3. **Rate Limiting**: Request rate limiting and throttling

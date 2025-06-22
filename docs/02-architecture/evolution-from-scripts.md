@@ -24,24 +24,25 @@ The process of creating a new project is as follows:
 
 ### 3. Technology Stack
 
--   **Backend**:
-    -   **Framework**: FastAPI (Python)
-    -   **Templating**: Jinja2
-    -   **Deployment**: Docker and Docker Compose for a containerized, production-ready environment.
+- **Backend**:
 
--   **Frontend**:
-    -   **Framework**: React (with Vite for tooling)
-    -   **Language**: JavaScript (with JSX)
-    -   **Styling**: Tailwind CSS
-    -   **Animation**: Framer Motion
-    -   **State Management**: React Hooks and Context API
+  - **Framework**: FastAPI (Python)
+  - **Templating**: Jinja2
+  - **Deployment**: Docker and Docker Compose for a containerized, production-ready environment.
+
+- **Frontend**:
+  - **Framework**: React (with Vite for tooling)
+  - **Language**: JavaScript (with JSX)
+  - **Styling**: Tailwind CSS
+  - **Animation**: Framer Motion
+  - **State Management**: React Hooks and Context API
 
 ### 4. Key Architectural Features
 
--   **Decoupled Frontend and Backend**: The frontend is a standalone React application that communicates with the backend via a REST API. This separation of concerns allows for independent development and deployment.
+- **Decoupled Frontend and Backend**: The frontend is a standalone React application that communicates with the backend via a REST API. This separation of concerns allows for independent development and deployment.
 
--   **Gamified User Experience**: The frontend features a multi-step wizard with gamification elements like a progress bar, achievements, and a "power level" to make the configuration process more engaging.
+- **Gamified User Experience**: The frontend features a multi-step wizard with gamification elements like a progress bar, achievements, and a "power level" to make the configuration process more engaging.
 
--   **Scalable Template System**: The Jinja2 template structure makes it easy to add new features, options, or even entire project types in the future by simply adding new templates and updating the configuration options.
+- **Scalable Template System**: The Jinja2 template structure makes it easy to add new features, options, or even entire project types in the future by simply adding new templates and updating the configuration options.
 
--   **Post-Generation Setup Script**: The generated project includes a `setup_environment.sh` script to automate initial setup tasks, such as creating a virtual environment and installing dependencies, ensuring a smooth onboarding experience for the user.
+- **Post-Generation Setup Script**: The generated project includes a `setup_environment.sh` script to automate initial setup tasks, such as creating a virtual environment and installing dependencies, ensuring a smooth onboarding experience for the user.

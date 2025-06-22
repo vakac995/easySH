@@ -7,12 +7,14 @@ The project is a web-based tool for generating custom projects. It consists of a
 ### Running the Application
 
 1. **Start the Backend:**
+
    ```bash
    cd backend
    python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
    ```
 
 2. **Start the Frontend:**
+
    ```bash
    cd frontend
    npm install
@@ -28,7 +30,7 @@ The project is a web-based tool for generating custom projects. It consists of a
 ✅ **Enhanced Configuration**: Frontend now collects all backend-required fields  
 ✅ **Extended Wizard**: Added database configuration step for complete setup  
 ✅ **API Synchronization**: Fixed frontend-backend configuration mismatch  
-✅ **Better UX**: Improved form validation and detailed configuration review  
+✅ **Better UX**: Improved form validation and detailed configuration review
 
 ## Features
 
@@ -52,6 +54,7 @@ project-name/
 📖 **[Complete Documentation](docs/README.md)** - Comprehensive guides and architecture documentation
 
 ### Quick Links
+
 - **[Project Overview](docs/01-project-overview/README.md)** - What easySH is and why it exists
 - **[Development Guide](docs/05-development/development-guide.md)** - Complete setup and development workflow
 - **[System Architecture](docs/02-architecture/system-architecture.md)** - How the system works

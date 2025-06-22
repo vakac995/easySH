@@ -58,19 +58,20 @@ const achievements = [
     id: 'project-named',
     title: 'Project Christened',
     icon: '🏷️',
-    description: 'You gave your project a unique name!'
+    description: 'You gave your project a unique name!',
   },
   {
-    id: 'database-postgresql', 
+    id: 'database-postgresql',
     title: 'Production Ready',
     icon: '🐘',
-    description: 'PostgreSQL chosen - enterprise grade!'
-  }
+    description: 'PostgreSQL chosen - enterprise grade!',
+  },
   // ... more achievements
 ];
 ```
 
 **Features**:
+
 - Dynamic unlocking based on user choices
 - Visual notifications with animations
 - Deduplication to prevent multiple rewards
@@ -95,6 +96,7 @@ const calculatePowerLevel = () => {
 ```
 
 **Features**:
+
 - Real-time calculation based on selections
 - Animated progress bars
 - Visual feedback for level progression
@@ -107,6 +109,7 @@ const calculatePowerLevel = () => {
 Provides rewarding feedback upon project completion:
 
 **Features**:
+
 - Particle effects and animations
 - Success messaging
 - Smooth transitions
@@ -164,19 +167,19 @@ const config = {
     pgAdminEmail: 'admin@example.com',
     pgAdminPassword: 'admin123',
     debug: false,
-    logLevel: 'INFO'
+    logLevel: 'INFO',
   },
   frontend: {
     include: true,
     projectName: '',
     uiLibrary: 'none',
     includeExamplePages: true,
-    includeHusky: false
+    includeHusky: false,
   },
   modules: {
     authentication: false,
-    notifications: false
-  }
+    notifications: false,
+  },
 };
 ```
 
@@ -197,7 +200,7 @@ The frontend configuration is transformed to match the backend's expected schema
 const transformConfigForApi = (config) => {
   return {
     global: {
-      projectName: config.projectName
+      projectName: config.projectName,
     },
     backend: {
       include: config.backend.include,
@@ -212,9 +215,9 @@ const transformConfigForApi = (config) => {
       moduleSystem: {
         include: frontendModules.length > 0,
         modules: frontendModules,
-        features: frontendFeatures
-      }
-    }
+        features: frontendFeatures,
+      },
+    },
   };
 };
 ```
@@ -225,7 +228,7 @@ const transformConfigForApi = (config) => {
 const response = await fetch('http://localhost:8000/api/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(apiPayload)
+  body: JSON.stringify(apiPayload),
 });
 
 if (response.ok) {

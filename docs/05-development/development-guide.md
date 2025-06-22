@@ -42,6 +42,7 @@ The backend will be available at `http://localhost:8000`
 #### API Documentation
 
 FastAPI automatically generates interactive API documentation:
+
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
@@ -74,6 +75,7 @@ The frontend will be available at `http://localhost:5173`
 ### Frontend Development
 
 #### Component Development
+
 1. Create new components in `frontend/src/components/`
 2. Use functional components with React hooks
 3. Add PropTypes for type checking
@@ -81,12 +83,14 @@ The frontend will be available at `http://localhost:5173`
 5. Add animations with Framer Motion
 
 #### State Management
+
 - Use `useState` for local component state
 - Use `useEffect` for side effects and lifecycle
 - Use `useCallback` for memoized event handlers
 - Pass state down through props or context
 
 #### Code Style
+
 ```bash
 # Format code
 npm run format
@@ -101,18 +105,21 @@ npm run type-check
 ### Backend Development
 
 #### Adding New Templates
+
 1. Create `.jinja2` files in `backend/templates/`
 2. Use the `config` object for dynamic content
 3. Test with different configuration combinations
 4. Update Pydantic models if new config fields are needed
 
 #### API Development
+
 1. Add new endpoints to `main.py`
 2. Use Pydantic models for request/response validation
 3. Add appropriate error handling
 4. Test with curl or the interactive docs
 
 #### Code Style
+
 ```bash
 # Format code (if using black)
 black main.py
@@ -126,6 +133,7 @@ mypy main.py
 ### Frontend Testing
 
 #### Manual Testing Checklist
+
 - [ ] All wizard steps load correctly
 - [ ] Form validation works as expected
 - [ ] Gamification features trigger properly
@@ -134,6 +142,7 @@ mypy main.py
 - [ ] Dark mode functions correctly
 
 #### Automated Testing (Future)
+
 ```bash
 # Unit tests
 npm run test
@@ -145,6 +154,7 @@ npm run test:e2e
 ### Backend Testing
 
 #### Manual Testing
+
 ```bash
 # Health check
 curl http://localhost:8000/
@@ -157,6 +167,7 @@ curl -X POST "http://localhost:8000/api/generate" \
 ```
 
 #### Automated Testing (Future)
+
 ```bash
 # Unit tests
 pytest
@@ -170,6 +181,7 @@ pytest tests/integration/
 ### Development Environment Variables
 
 #### Backend (.env)
+
 ```bash
 DEBUG=true
 LOG_LEVEL=INFO
@@ -177,6 +189,7 @@ CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 #### Frontend (.env.local)
+
 ```bash
 VITE_API_URL=http://localhost:8000
 ```
@@ -184,12 +197,14 @@ VITE_API_URL=http://localhost:8000
 ### Production Considerations
 
 #### Backend
+
 - Use environment variables for sensitive configuration
 - Enable HTTPS and proper CORS settings
 - Configure logging and monitoring
 - Use production WSGI server (Gunicorn)
 
 #### Frontend
+
 - Build for production: `npm run build`
 - Serve static files with web server (Nginx, Apache)
 - Configure proper cache headers
@@ -200,12 +215,14 @@ VITE_API_URL=http://localhost:8000
 ### Frontend Debugging
 
 #### Browser DevTools
+
 - Use React Developer Tools extension
 - Check Network tab for API requests
 - Monitor Console for JavaScript errors
 - Use Sources tab for breakpoint debugging
 
 #### Common Issues
+
 1. **API connection errors**: Check backend server status
 2. **CORS errors**: Verify backend CORS configuration
 3. **Component re-render issues**: Use React DevTools Profiler
@@ -214,6 +231,7 @@ VITE_API_URL=http://localhost:8000
 ### Backend Debugging
 
 #### Logging
+
 ```python
 import logging
 logger = logging.getLogger(__name__)
@@ -224,6 +242,7 @@ logger.info(f"Generated files for project: {project_name}")
 ```
 
 #### Common Issues
+
 1. **Template rendering errors**: Check Jinja2 syntax and config object
 2. **ZIP generation failures**: Verify file paths and permissions
 3. **Pydantic validation errors**: Check request payload structure
@@ -250,6 +269,7 @@ docker-compose down
 ### Development with Docker
 
 #### Backend Only
+
 ```bash
 cd backend
 docker build -t easysh-backend .
@@ -257,6 +277,7 @@ docker run -p 8000:8000 -v $(pwd):/app easysh-backend
 ```
 
 #### Frontend Only
+
 ```bash
 cd frontend
 docker build -t easysh-frontend .
@@ -268,6 +289,7 @@ docker run -p 5173:5173 -v $(pwd)/src:/app/src easysh-frontend
 ### VS Code Recommended Extensions
 
 #### Frontend
+
 - ES7+ React/Redux/React-Native snippets
 - Prettier - Code formatter
 - ESLint
@@ -275,6 +297,7 @@ docker run -p 5173:5173 -v $(pwd)/src:/app/src easysh-frontend
 - Auto Rename Tag
 
 #### Backend
+
 - Python
 - Pylance
 - Python Docstring Generator
@@ -282,6 +305,7 @@ docker run -p 5173:5173 -v $(pwd)/src:/app/src easysh-frontend
 - Better Jinja
 
 ### VS Code Settings
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -299,6 +323,7 @@ docker run -p 5173:5173 -v $(pwd)/src:/app/src easysh-frontend
 ### Frontend Performance
 
 #### Bundle Analysis
+
 ```bash
 # Analyze bundle size
 npm run build
@@ -306,6 +331,7 @@ npx vite-bundle-analyzer dist
 ```
 
 #### Optimization Techniques
+
 - Use `React.memo` for expensive components
 - Implement `useCallback` and `useMemo` appropriately
 - Code splitting with dynamic imports
@@ -315,6 +341,7 @@ npx vite-bundle-analyzer dist
 ### Backend Performance
 
 #### Profiling
+
 ```python
 import cProfile
 import pstats
@@ -322,9 +349,9 @@ import pstats
 def profile_endpoint():
     profiler = cProfile.Profile()
     profiler.enable()
-    
+
     # Your endpoint logic here
-    
+
     profiler.disable()
     stats = pstats.Stats(profiler)
     stats.sort_stats('cumulative')
@@ -332,6 +359,7 @@ def profile_endpoint():
 ```
 
 #### Optimization Techniques
+
 - Use async/await for I/O operations
 - Implement response caching
 - Optimize template rendering
@@ -343,11 +371,13 @@ def profile_endpoint():
 ### Frontend Deployment
 
 #### Build for Production
+
 ```bash
 npm run build
 ```
 
 #### Static File Serving
+
 - Upload `dist/` folder to CDN or web server
 - Configure proper cache headers
 - Enable gzip compression
@@ -356,6 +386,7 @@ npm run build
 ### Backend Deployment
 
 #### Production Server
+
 ```bash
 # Using Gunicorn
 gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
@@ -366,6 +397,7 @@ docker run -p 8000:8000 easysh-backend
 ```
 
 #### Environment Configuration
+
 - Set production environment variables
 - Configure proper logging
 - Enable monitoring and health checks
@@ -376,6 +408,7 @@ docker run -p 8000:8000 easysh-backend
 ### Common Development Issues
 
 #### Frontend Won't Start
+
 ```bash
 # Clear node modules and reinstall
 rm -rf node_modules package-lock.json
@@ -386,6 +419,7 @@ node --version  # Should be 18+
 ```
 
 #### Backend Won't Start
+
 ```bash
 # Check Python version
 python --version  # Should be 3.8+
@@ -398,11 +432,13 @@ netstat -an | grep 8000
 ```
 
 #### CORS Issues
+
 - Verify backend CORS configuration in `main.py`
 - Check frontend API URL configuration
 - Ensure both servers are running on expected ports
 
 #### Template Rendering Errors
+
 - Validate Jinja2 template syntax
 - Check that config object contains expected fields
 - Verify file paths and directory structure
@@ -418,6 +454,7 @@ netstat -an | grep 8000
 ## Contributing
 
 ### Code Review Process
+
 1. Create feature branch from `main`
 2. Make changes with clear commit messages
 3. Test changes thoroughly
@@ -426,6 +463,7 @@ netstat -an | grep 8000
 6. Merge after approval
 
 ### Code Standards
+
 - Follow existing code style and patterns
 - Add appropriate comments and documentation
 - Include tests for new functionality
