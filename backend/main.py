@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class GlobalConfig(BaseModel):
@@ -104,6 +105,14 @@ app = FastAPI(
     title="Project Generation Service",
     description="Generates project structures from templates based on user configuration.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 template_dir = Path(__file__).parent / "templates"
