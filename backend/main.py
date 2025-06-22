@@ -128,13 +128,17 @@ app = FastAPI(
 
 # --- CORS Middleware Setup ---
 # This allows the frontend (running on a different port) to communicate with the backend.
+# For production, we explicitly allow the GitHub Pages domain
+
+# Get allowed origins from environment variable or use defaults
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else []
+
 origins = [
     "http://localhost",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://*.github.io",  # GitHub Pages
-    "https://vakac995.github.io",
-]
+    "https://vakac995.github.io",  # GitHub Pages - production frontend
+] + allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
