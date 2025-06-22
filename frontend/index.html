@@ -560,8 +560,8 @@
             handleInputChange(e, 'backend.dbName'),
           );
           ui.backend.dbUser.addEventListener('input', (e) =>
-            handleInputChange(e, 'backend.dbUser'),
-          );
+            handleInputChange(e, 'backend.dbUser',
+          ));
           ui.backend.dbPassword.addEventListener('input', (e) =>
             handleInputChange(e, 'backend.dbPassword'),
           );
@@ -603,7 +603,10 @@
           ui.frontend.moduleSystem.addModuleBtn.addEventListener('click', () => addModule());
           ui.frontend.moduleSystem.addFeatureBtn.addEventListener('click', () => addFeature());
 
-          ui.generateBtn.addEventListener('click', showGenerationModal);
+          ui.generateBtn.addEventListener('click', generateAndDownload);
+          // You can still use the modal to see the JSON if you want.
+          // For that, you could add another button or change the event.
+          // For now, the main button triggers the download.
           ui.modal.closeBtn.addEventListener('click', hideGenerationModal);
           ui.modal.copyBtn.addEventListener('click', copyJsonToClipboard);
         };
@@ -684,6 +687,66 @@
         const removeFeature = (index) => {
           config.frontend.moduleSystem.features.splice(index, 1);
           renderLists();
+        };
+
+        const generateAndDownload = async () => {
+          const configToDisplay = JSON.parse(JSON.stringify(config));
+          if (!configToDisplay.backend.include) delete configToDisplay.backend;
+          if (!configToDisplay.frontend.include) delete configToDisplay.frontend;
+          if (
+            configToDisplay.frontend &&
+            configToDisplay.frontend.moduleSystem &&
+            !configToDisplay.frontend.moduleSystem.include
+          ) {
+            delete configToDisplay.frontend.moduleSystem;
+          }
+
+          // Show loading state
+          ui.generateBtn.disabled = true;
+          ui.generateBtn.textContent = 'Generating...';
+
+          try {
+            const response = await fetch('http://127.0.0.1:8000/api/generate', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(configToDisplay),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.detail || 'An unknown error occurred.');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            // The filename is derived from the response headers if available, otherwise fallback
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'project.zip';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+?)"/);
+                if (filenameMatch.length > 1) {
+                    filename = filenameMatch[1];
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+          } catch (error) {
+            console.error('Generation failed:', error);
+            alert(`Generation failed: ${error.message}`);
+          } finally {
+            // Restore button state
+            ui.generateBtn.disabled = false;
+            ui.generateBtn.textContent = 'Generate & Download';
+          }
         };
 
         const showGenerationModal = () => {

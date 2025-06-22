@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: {{ config.backend.projectName }}
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://{{ config.backend.dbUser }}:{{ config.backend.dbPassword }}@{{ config.backend.dbHost }}:{{ config.backend.dbPort }}/{{ config.backend.dbName }}
+      - LOG_LEVEL={{ config.backend.logLevel }}
+      - DEBUG={{ config.backend.debug }}
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    container_name: {{ config.backend.dbHost }}
+    environment:
+      POSTGRES_DB: {{ config.backend.dbName }}
+      POSTGRES_USER: {{ config.backend.dbUser }}
+      POSTGRES_PASSWORD: {{ config.backend.dbPassword }}
+    ports:
+      - "{{ config.backend.dbPort }}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_{{ config.backend.projectName }}
+    environment:
+      PGADMIN_DEFAULT_EMAIL: {{ config.backend.pgAdminEmail }}
+      PGADMIN_DEFAULT_PASSWORD: {{ config.backend.pgAdminPassword }}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

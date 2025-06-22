@@ -1,0 +1,12 @@
+-- Insert sample data
+INSERT INTO users (username, email) VALUES
+    ('john_doe', 'john@example.com'),
+    ('jane_smith', 'jane@example.com'),
+    ('bob_wilson', 'bob@example.com')
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO posts (title, content, user_id) VALUES
+    ('Welcome Post', 'This is a welcome post content', 1),
+    ('Hello World', 'Another sample post', 2),
+    ('Getting Started', 'How to get started with our app', 1)
+ON CONFLICT DO NOTHING;

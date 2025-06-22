@@ -1,0 +1,18 @@
+
+import { ReactNode } from 'react';
+import { useMultiCheck } from '@/hooks/useConfig';
+import type { MultiCheckConfig } from '@/types/config';
+
+interface ConditionalRenderProps {
+  config: MultiCheckConfig;
+  children: ReactNode;
+}
+
+export const ConditionalRender: React.FC<ConditionalRenderProps> = ({
+  config,
+  children,
+}) => {
+  const isVisible = useMultiCheck(config);
+
+  return isVisible ? <>{children}</> : null;
+};

@@ -1,0 +1,127 @@
+#!/bin/bash
+
+# ============================================================================
+# 🚀 PROJECT ENVIRONMENT SETUP SCRIPT
+# ============================================================================
+# This script prepares the development environment for your generated project.
+# It will detect which parts of the project (backend, frontend) are present
+# and perform the necessary setup steps for each.
+#
+# To run:
+# 1. Make the script executable: chmod +x setup_environment.sh
+# 2. Run the script: ./setup_environment.sh
+# ============================================================================
+
+set -e # Exit immediately if a command exits with a non-zero status.
+
+# --- Colors and Formatting ---
+declare -r RED='\033[0;31m'
+declare -r GREEN='\033[0;32m'
+declare -r YELLOW='\033[1;33m'
+declare -r BLUE='\033[0;34m'
+declare -r PURPLE='\033[0;35m'
+declare -r CYAN='\033[0;36m'
+declare -r NC='\033[0m' # No Color
+
+# --- Helper Functions ---
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_step() { echo -e "\n${PURPLE}==> $1${NC}"; }
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# --- Script Start ---
+
+log_info "Starting environment setup for '{{ config.global.projectName }}'..."
+
+{% if config.backend.include %}
+# --- Backend Setup ---
+log_step "Setting up the Backend ('{{ config.backend.projectName }}')"
+
+if [ -d "{{ config.backend.projectName }}" ]; then
+  cd "{{ config.backend.projectName }}"
+
+  if command_exists docker && command_exists docker-compose; then
+    log_info "Docker and docker-compose found."
+    read -p "🐳 Do you want to build and start the Docker containers? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      log_info "Starting Docker services in the background..."
+      if docker-compose up -d --build; then
+        log_success "Backend services started successfully with Docker."
+        log_info "- FastAPI App: http://localhost:8000"
+        log_info "- pgAdmin: http://localhost:5050"
+      else
+        log_error "Failed to start Docker services. Please check the output above."
+      fi
+    else
+      log_warning "Skipping Docker setup. You can run 'docker-compose up -d' manually later."
+    fi
+  else
+    log_warning "Docker or docker-compose not found. Skipping Docker setup."
+    log_info "To run the backend, you will need to set up a Python environment manually."
+    log_info "1. Create a virtual environment: python -m venv venv"
+    log_info "2. Activate it: source venv/bin/activate"
+    log_info "3. Install dependencies: pip install -r requirements.txt"
+    log_info "4. Run the dev server: ./start_dev.sh"
+  fi
+
+  cd ..
+else
+  log_warning "Backend directory '{{ config.backend.projectName }}' not found."
+fi
+{% endif %}
+
+{% if config.frontend.include %}
+# --- Frontend Setup ---
+log_step "Setting up the Frontend ('{{ config.frontend.projectName }}')"
+
+if [ -d "{{ config.frontend.projectName }}" ]; then
+  cd "{{ config.frontend.projectName }}"
+
+  if command_exists npm; then
+    log_info "npm found."
+    read -p "📦 Do you want to install frontend dependencies with npm? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      log_info "Installing npm packages... This may take a moment."
+      if npm install; then
+        log_success "Frontend dependencies installed successfully."
+        log_info "You can now start the development server by running: npm run dev"
+      else
+        log_error "Failed to install npm packages. Please check the output above."
+      fi
+    else
+      log_warning "Skipping npm install. You can run 'npm install' manually later."
+    fi
+  else
+    log_error "npm is not installed. Please install Node.js and npm to set up the frontend."
+  fi
+
+  cd ..
+else
+  log_warning "Frontend directory '{{ config.frontend.projectName }}' not found."
+fi
+{% endif %}
+
+# --- Final Summary ---
+log_step "Setup Complete!"
+log_success "Your project environment has been configured."
+
+log_info "\n--- Next Steps ---"
+{% if config.backend.include %}
+log_info "Backend ('{{ config.backend.projectName }}'):"
+log_info "  - To start/stop services: cd {{ config.backend.projectName }} && docker-compose up/down"
+log_info "  - To view logs: cd {{ config.backend.projectName }} && docker-compose logs -f app"
+{% endif %}
+{% if config.frontend.include %}
+log_info "Frontend ('{{ config.frontend.projectName }}'):"
+log_info "  - To start dev server: cd {{ config.frontend.projectName }} && npm run dev"
+{% endif %}
+log_info "Happy coding! 🚀"
+

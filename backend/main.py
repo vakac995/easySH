@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
@@ -126,10 +127,75 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# --- CORS Middleware Setup ---
+# This allows the frontend (running on a different port) to communicate with the backend.
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # --- Jinja2 Template Engine Setup ---
 # This assumes a 'templates' directory exists in the same location as main.py
 template_dir = Path(__file__).parent / "templates"
 jinja_env = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
+
+
+def _process_template_directory(
+    zip_file: zipfile.ZipFile,
+    config: MasterConfig,
+    dir_name: str,
+    template_dir: Path,
+    jinja_env: Environment,
+):
+    """Processes a single directory of templates (e.g., 'backend' or 'frontend')."""
+    source_dir = template_dir / dir_name
+    for root, _, files in os.walk(source_dir):
+        template_root_path = Path(root)
+        for filename in files:
+            if not filename.endswith(".jinja2"):
+                continue
+
+            template_path = template_root_path / filename
+            try:
+                template_name_for_loader = str(
+                    template_path.relative_to(template_dir)
+                ).replace("\\", "/")
+                template = jinja_env.get_template(template_name_for_loader)
+
+                rendered_content = template.render(
+                    config=config.model_dump(by_alias=True)
+                )
+
+                relative_path_in_project = template_root_path.relative_to(source_dir)
+                final_filename = filename.removesuffix(".jinja2")
+                project_part_name = (
+                    config.backend.projectName
+                    if dir_name == "backend"
+                    else config.frontend.projectName
+                )
+
+                zip_path = (
+                    Path(config.global_config.projectName)
+                    / project_part_name
+                    / relative_path_in_project
+                    / final_filename
+                )
+                zip_file.writestr(str(zip_path), rendered_content)
+            except Exception as e:
+                print(f"Error processing template {template_path}: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to render template: {filename}",
+                )
 
 
 # --- API Endpoint Definition ---
@@ -144,58 +210,35 @@ async def generate_project(config: MasterConfig):
             detail="At least one part of the project (backend or frontend) must be included.",
         )
 
-    # Use an in-memory buffer for the zip file
     zip_buffer = io.BytesIO()
-
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        # Walk through the templates directory
-        for root, _, files in os.walk(template_dir):
-            template_root_path = Path(root)
+        dirs_to_process: List[str] = []
+        if config.backend.include:
+            dirs_to_process.append("backend")
+        if config.frontend.include:
+            dirs_to_process.append("frontend")
 
-            # Determine if the current directory of templates should be included
-            if "backend" in template_root_path.parts and not config.backend.include:
-                continue
-            if "frontend" in template_root_path.parts and not config.frontend.include:
-                continue
+        for dir_name in dirs_to_process:
+            _process_template_directory(
+                zip_file, config, dir_name, template_dir, jinja_env
+            )
 
-            for filename in files:
-                if not filename.endswith(".jinja2"):
-                    continue
-
-                template_path = template_root_path / filename
-
-                try:
-                    # Load the Jinja2 template
-                    template = jinja_env.get_template(
-                        str(template_path.relative_to(template_dir))
-                    )
-
-                    # Render the template with the config data
-                    # We pass the config as a dict to be accessible in Jinja2
-                    rendered_content = template.render(config.model_dump(by_alias=True))
-
-                    # Determine the final path in the zip archive
-                    # 1. Get path relative to the templates dir
-                    relative_path = template_path.relative_to(template_dir)
-                    # 2. Remove the .jinja2 extension
-                    final_filename = relative_path.with_suffix("").name
-                    # 3. Reconstruct path without template file name
-                    final_dir = relative_path.parent
-
-                    # Add to zip inside the main project folder
-                    zip_path = (
-                        Path(config.global_config.projectName)
-                        / final_dir
-                        / final_filename
-                    )
-
-                    zip_file.writestr(str(zip_path), rendered_content)
-
-                except Exception as e:
-                    print(f"Error processing template {template_path}: {e}")
-                    raise HTTPException(
-                        status_code=500, detail=f"Failed to render template: {filename}"
-                    )
+        # Add the setup script to the root of the project
+        try:
+            setup_template = jinja_env.get_template("setup_environment.sh.jinja2")
+            rendered_setup_script = setup_template.render(
+                config=config.model_dump(by_alias=True)
+            )
+            setup_script_path = (
+                Path(config.global_config.projectName) / "setup_environment.sh"
+            )
+            zip_file.writestr(str(setup_script_path), rendered_setup_script)
+        except Exception as e:
+            print(f"Error processing setup_environment.sh template: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to render setup_environment.sh",
+            )
 
     # Rewind buffer to the beginning
     zip_buffer.seek(0)

@@ -1,0 +1,85 @@
+import { ModuleConfig, AppConfig, User } from '@/types/config';
+import { get, set, cloneDeep } from 'lodash';
+
+/**
+ * Deeply merges a partial configuration into a full configuration.
+ * @param baseConfig The base configuration.
+ * @param partialConfig The partial configuration to merge.
+ * @returns A new configuration object with the merged values.
+ */
+export function mergeConfigs(baseConfig: AppConfig, partialConfig: Partial<AppConfig>): AppConfig {
+  const merged = cloneDeep(baseConfig);
+  for (const key in partialConfig) {
+    const typedKey = key as keyof AppConfig;
+    if (typeof merged[typedKey] === 'object' && merged[typedKey] !== null && !Array.isArray(merged[typedKey])) {
+      // Deep merge for nested objects
+      set(merged, typedKey, { ...get(merged, typedKey, {}), ...get(partialConfig, typedKey, {}) });
+    } else {
+      // Overwrite for primitives and arrays
+      set(merged, typedKey, get(partialConfig, typedKey));
+    }
+  }
+  return merged;
+}
+
+/**
+ * Validates the structure of the AppConfig.
+ * @param config The configuration to validate.
+ * @returns True if the config is valid, otherwise throws an error.
+ */
+export function validateConfig(config: AppConfig): boolean {
+  if (!config || typeof config !== 'object') {
+    throw new Error('Invalid configuration: root is missing or not an object.');
+  }
+  if (typeof config.version !== 'string' || !config.version) {
+    throw new Error('Invalid configuration: version is missing or invalid.');
+  }
+  if (typeof config.environment !== 'string' || !config.environment) {
+    throw new Error('Invalid configuration: environment is missing or invalid.');
+  }
+  if (typeof config.modules !== 'object' || config.modules === null) {
+    throw new Error('Invalid configuration: modules is missing or not an object.');
+  }
+  return true;
+}
+
+/**
+ * Recursively finds a module by its ID in the configuration.
+ * @param moduleId The ID of the module to find.
+ * @param modules The dictionary of modules to search in.
+ * @returns The ModuleConfig if found, otherwise null.
+ */
+export function findModuleById(moduleId: string, modules: Record<string, ModuleConfig>): ModuleConfig | null {
+  if (modules[moduleId]) {
+    return modules[moduleId];
+  }
+  for (const key in modules) {
+    const module = modules[key];
+    if (module.children) {
+      const found = module.children.find(child => child.id === moduleId);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Checks if a user has the required permissions for a given module.
+ * @param module The module configuration.
+ * @param user The user object.
+ * @returns True if the user has the required permissions, false otherwise.
+ */
+export function checkModulePermissions(module: ModuleConfig, user: User): boolean {
+  if (!module.permissions || module.permissions.length === 0) {
+    // No permissions required
+    return true;
+  }
+  if (!user || !user.permissions) {
+    // User has no permissions
+    return false;
+  }
+  // Check if user has at least one of the required permissions
+  return module.permissions.some(p => user.permissions.includes(p));
+}

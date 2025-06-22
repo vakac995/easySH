@@ -1,0 +1,161 @@
+"""
+FastAPI Application with PostgreSQL
+Production-ready with Gunicorn support
+"""
+import logging
+import os
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Dict, Any
+from src.database_manager import get_db_manager, execute_sql
+
+# Load environment variables
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+# FastAPI app
+app = FastAPI(
+    title="A robust backend service.",
+    description="FastAPI application with PostgreSQL and SQLAlchemy",
+    version="0.1.0"
+)
+
+# Pydantic models
+class User(BaseModel):
+    username: str
+    email: str
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    created_at: str
+
+class PostResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    user_id: int
+    created_at: str
+
+@app.get("/")
+async def root():
+    """Health check endpoint"""
+    try:
+        # Test database connection
+        result = execute_sql("SELECT 'Hello PostgreSQL!' as message, NOW() as current_time")
+        return {
+            "message": "FastAPI + PostgreSQL Application",
+            "status": "healthy",
+            "database": result[0] if result else "connection failed"
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(status_code=500, detail="Database connection failed")
+
+@app.get("/health")
+async def health_check():
+    """Detailed health check"""
+    try:
+        # Test database
+        db_result = execute_sql("SELECT 1 as test")
+        
+        # Check tables
+        tables_result = execute_sql("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """)
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "tables": [row["table_name"] for row in tables_result],
+            "version": "0.1.0"
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/users", response_model=List[UserResponse])
+async def get_users():
+    """Get all users"""
+    try:
+        result = execute_sql("SELECT * FROM users ORDER BY created_at DESC")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to get users: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve users")
+
+@app.get("/users/{username}", response_model=UserResponse)
+async def get_user(username: str):
+    """Get user by username"""
+    try:
+        result = execute_sql(
+            "SELECT * FROM users WHERE username = :username",
+            {"username": username},
+            fetch_all=False
+        )
+        if not result:
+            raise HTTPException(status_code=404, detail="User not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get user {username}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve user")
+
+@app.get("/users/{username}/posts", response_model=List[PostResponse])
+async def get_user_posts(username: str):
+    """Get posts for a specific user"""
+    try:
+        result = execute_sql("""
+            SELECT p.* 
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            WHERE u.username = :username
+            ORDER BY p.created_at DESC
+        """, {"username": username})
+        return result
+    except Exception as e:
+        logger.error(f"Failed to get posts for {username}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve posts")
+
+@app.post("/users", response_model=UserResponse)
+async def create_user(user: User):
+    """Create a new user"""
+    try:
+        result = execute_sql("""
+            INSERT INTO users (username, email) 
+            VALUES (:username, :email)
+            RETURNING *
+        """, {"username": user.username, "email": user.email}, fetch_all=False)
+        return result
+    except Exception as e:
+        logger.error(f"Failed to create user: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create user")
+
+def main():
+    """Main function for development testing"""
+    try:
+        print("=== FastAPI Application Test ===")
+        
+        # Test database connection
+        db = get_db_manager()
+        result = execute_sql("SELECT 'Hello PostgreSQL!' as message, NOW() as current_time")
+        
+        for row in result:
+            print(f"Message: {row['message']}")
+            print(f"Time: {row['current_time']}")
+        
+        print("✅ Database connection successful!")
+        print("🚀 Start the server with: uvicorn main:app --reload")
+        print("🌐 Or production: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker")
+        
+    except Exception as e:
+        logger.error(f"Application test failed: {e}")
+        exit(1) 

@@ -1,0 +1,35 @@
+
+export { useConfig } from '@/providers/ConfigProvider';
+import { useConfig } from '@/providers/ConfigProvider';
+import type { LogicOperator, MultiCheckConfig } from '@/types/config';
+
+export const useModule = (moduleId: string) => {
+  const { isModuleEnabled, config } = useConfig();
+  const moduleConfig = config?.modules.find(m => m.id === moduleId);
+  return { ...moduleConfig, isEnabled: isModuleEnabled(moduleId) };
+};
+
+export const useModules = (moduleIds: string[], logic: LogicOperator = 'AND') => {
+  const { checkMultiple } = useConfig();
+  return checkMultiple({ modules: moduleIds, logic });
+};
+
+export const useFeature = (featureName: string): boolean => {
+  const { isFeatureEnabled } = useConfig();
+  return isFeatureEnabled(featureName);
+};
+
+export const useFeatures = (featureNames: string[], logic: LogicOperator = 'AND'): boolean => {
+  const { checkMultiple } = useConfig();
+  return checkMultiple({ features: featureNames, logic });
+};
+
+export const usePermissions = (permissions: string[], logic: LogicOperator = 'AND') => {
+  const { checkMultiple } = useConfig();
+  return checkMultiple({ permissions, logic });
+};
+
+export const useMultiCheck = (config: MultiCheckConfig) => {
+  const { checkMultiple } = useConfig();
+  return checkMultiple(config);
+};

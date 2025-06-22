@@ -1,0 +1,139 @@
+{% if config.frontend.moduleSystem.include %}
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { useConfig, useModule, useFeature } from '@/hooks/useConfig';
+import { ConditionalRender } from '@/components/ConditionalRender';
+
+export function Home() {
+  const [count, setCount] = useState(0);
+  const { config, loading } = useConfig();
+  const fibiModule = useModule('fibi');
+  const isDarkMode = useFeature('darkMode');
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <span className="ml-2">Loading configuration...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight">Welcome Home</h2>
+      
+      {/* Configuration Status */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h3 className="font-semibold text-blue-900 mb-2">Configuration Status</h3>
+        <p className="text-sm text-blue-700">
+          Environment: <span className="font-mono">{config?.environment}</span> | 
+          Version: <span className="font-mono">{config?.version}</span> |
+          Dark Mode: <span className={cn("font-mono", isDarkMode ? "text-green-600" : "text-red-600")}>
+            {isDarkMode ? "Enabled" : "Disabled"}
+          </span>
+        </p>
+      </div>
+
+      {/* Counter Example */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-4">Counter Example</h3>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setCount((c) => c - 1)}
+            className="btn-secondary"
+          >
+            Decrement
+          </button>
+          <span className={cn(
+            'text-2xl font-mono font-bold',
+            count > 0 && 'text-green-600',
+            count < 0 && 'text-red-600'
+          )}>
+            {count}
+          </span>
+          <button
+            onClick={() => setCount((c) => c + 1)}
+            className="btn-primary"
+          >
+            Increment
+          </button>
+        </div>
+      </div>
+
+      {/* Conditional Module Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ConditionalRender module="fibi">
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h3 className="font-semibold text-green-900">🏦 FIBI Module</h3>
+            <p className="text-sm text-green-700">
+              Financial module is enabled and ready to use.
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Config: {JSON.stringify(fibiModule.config?.permissions)}
+            </p>
+          </div>
+        </ConditionalRender>
+
+        <ConditionalRender module="retention">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-semibold text-blue-900">📊 Retention Module</h3>
+            <p className="text-sm text-blue-700">
+              Customer retention analytics available.
+            </p>
+          </div>
+        </ConditionalRender>
+
+        <ConditionalRender 
+          module={["fibi", "retention"]} 
+          checkLogic="OR"
+        >
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <h3 className="font-semibold text-purple-900">🔗 Combined Features</h3>
+            <p className="text-sm text-purple-700">
+              Advanced features available when any financial module is active.
+            </p>
+          </div>
+        </ConditionalRender>
+
+        <ConditionalRender 
+          feature="analytics"
+          environment={["production", "test"]}
+          logic="AND"
+        >
+          <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+            <h3 className="font-semibold text-orange-900">📈 Analytics</h3>
+            <p className="text-sm text-orange-700">
+              Analytics enabled for production/test environments.
+            </p>
+          </div>
+        </ConditionalRender>
+      </div>
+
+      {/* Development Tools */}
+      <ConditionalRender environment={["development", "test"]}>
+        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <h3 className="font-semibold text-yellow-900">🛠️ Development Tools</h3>
+          <p className="text-sm text-yellow-700">
+            Debug tools are available in development/test environments.
+          </p>
+          <button 
+            className="mt-2 px-3 py-1 bg-yellow-200 text-yellow-800 rounded text-xs"
+            onClick={() => console.log('Current config:', config)}
+          >
+            Log Config to Console
+          </button>
+        </div>
+      </ConditionalRender>
+    </div>
+  );
+}
+{% else %}
+export function Home() {
+  return (
+    <div>
+      <h2>Home</h2>
+    </div>
+  );
+}
+{% endif %}
