@@ -9,7 +9,7 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [[headers]]
-for = "/*"
+for = "/api/generate"
 [headers.values]
 Access-Control-Allow-Origin = "https://vakac995.github.io"
 Access-Control-Allow-Methods = "*"
