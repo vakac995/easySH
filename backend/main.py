@@ -153,9 +153,10 @@ def add_cors_headers(response: Response) -> Response:
     if environment == "development":
         # Development: Allow localhost origins
         response.headers["Access-Control-Allow-Origin"] = "*"
-    else:        # Production: Use Railway-compatible origin
+    else:
+        # Production: Use Railway-compatible origin
         response.headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
-    
+
     response.headers["Access-Control-Allow-Methods"] = (
         "GET, POST, PUT, DELETE, OPTIONS, HEAD"
     )
@@ -296,30 +297,32 @@ async def generate_project(config: MasterConfig):
             raise HTTPException(
                 status_code=500,
                 detail="Failed to render setup_environment.sh",
-            )    # Rewind buffer to the beginning
+            )  # Rewind buffer to the beginning
     zip_buffer.seek(0)
     zip_filename = f"{config.global_config.projectName}.zip"
-    
+
     # Create headers with CORS support
     headers = {"Content-Disposition": f'attachment; filename="{zip_filename}"'}
-    
+
     # Add CORS headers for development vs production
     if environment == "development":
         headers["Access-Control-Allow-Origin"] = "*"
     else:
         headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
-    
-    headers.update({
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
-        "Access-Control-Allow-Headers": (
-            "Accept, Accept-Language, Content-Language, Content-Type, "
-            "Authorization, X-Requested-With, Origin, Access-Control-Request-Method, "
-            "Access-Control-Request-Headers, Cache-Control, Pragma"
-        ),
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Expose-Headers": "Content-Disposition, Content-Length",
-        "Access-Control-Max-Age": "86400"
-    })
+
+    headers.update(
+        {
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": (
+                "Accept, Accept-Language, Content-Language, Content-Type, "
+                "Authorization, X-Requested-With, Origin, Access-Control-Request-Method, "
+                "Access-Control-Request-Headers, Cache-Control, Pragma"
+            ),
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Expose-Headers": "Content-Disposition, Content-Length",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
 
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
 
