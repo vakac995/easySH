@@ -32,15 +32,27 @@ test_endpoint() {
     echo "Method: $method"
 
     if [ "$verbose" = "verbose" ]; then
-        curl -v -H "Origin: $origin" "$url$endpoint" 2>&1 | grep -E "(< |> )(Access-Control|Origin|HTTP|Vary)" | head -10
+        if [ -n "$origin" ]; then
+            curl -v -H "Origin: $origin" "$url$endpoint" 2>&1 | grep -E "(< |> )(Access-Control|Origin|HTTP|Vary)" | head -10
+        else
+            curl -v "$url$endpoint" 2>&1 | grep -E "(< |> )(Access-Control|Origin|HTTP|Vary)" | head -10
+        fi
         echo ""
         return
     fi
 
     if [ "$method" = "GET" ]; then
-        RESPONSE=$(curl -s -w "%{http_code}" -H "Origin: $origin" "$url$endpoint" 2>/dev/null)
+        if [ -n "$origin" ]; then
+            RESPONSE=$(curl -s -w "%{http_code}" -H "Origin: $origin" "$url$endpoint" 2>/dev/null)
+        else
+            RESPONSE=$(curl -s -w "%{http_code}" "$url$endpoint" 2>/dev/null)
+        fi
     else
-        RESPONSE=$(curl -s -w "%{http_code}" -X "$method" -H "Origin: $origin" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type" "$url$endpoint" 2>/dev/null)
+        if [ -n "$origin" ]; then
+            RESPONSE=$(curl -s -w "%{http_code}" -X "$method" -H "Origin: $origin" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type" "$url$endpoint" 2>/dev/null)
+        else
+            RESPONSE=$(curl -s -w "%{http_code}" -X "$method" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type" "$url$endpoint" 2>/dev/null)
+        fi
     fi
 
     HTTP_CODE="${RESPONSE: -3}"
