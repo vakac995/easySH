@@ -1,0 +1,544 @@
+{
+  "info": {
+    "name": "EasySH API Collection",
+    "description": "Comprehensive API test suite for EasySH Project Generation Service",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url_dev",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "base_url_prod",
+      "value": "https://your-railway-app.railway.app",
+      "type": "string"
+    },
+    {
+      "key": "current_base_url",
+      "value": "{{base_url_dev}}",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check & CORS",
+      "item": [
+        {
+          "name": "Health Check - Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{current_base_url}}/",
+              "host": ["{{current_base_url}}"],
+              "path": [""]
+            },
+            "description": "Basic health check to verify API is running"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains status ok', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('ok');",
+                  "    pm.expect(jsonData.message).to.include('API is running');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CORS Test",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:5173",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{current_base_url}}/api/cors-test",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "cors-test"]
+            },
+            "description": "Test CORS configuration"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CORS headers are present', function () {",
+                  "    pm.response.to.have.header('Access-Control-Allow-Origin');",
+                  "});",
+                  "",
+                  "pm.test('Response indicates CORS success', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('success');",
+                  "    pm.expect(jsonData.message).to.include('CORS is working');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CORS Preflight - Generate",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:5173",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "Content-Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test CORS preflight for generate endpoint"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CORS preflight headers are present', function () {",
+                  "    pm.response.to.have.header('Access-Control-Allow-Methods');",
+                  "    pm.response.to.have.header('Access-Control-Allow-Headers');",
+                  "    pm.response.to.have.header('Access-Control-Max-Age');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Project Generation",
+      "item": [
+        {
+          "name": "Generate Backend Only",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Origin",
+                "value": "http://localhost:5173",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"TestBackendOnly\"\n  },\n  \"backend\": {\n    \"include\": true,\n    \"projectName\": \"api-service\",\n    \"projectDescription\": \"Backend API Service\",\n    \"projectVersion\": \"1.0.0\",\n    \"dbHost\": \"localhost\",\n    \"dbPort\": 5432,\n    \"dbName\": \"test_db\",\n    \"dbUser\": \"test_user\",\n    \"dbPassword\": \"test_pass\",\n    \"pgAdminEmail\": \"admin@test.com\",\n    \"pgAdminPassword\": \"admin123\",\n    \"debug\": true,\n    \"logLevel\": \"DEBUG\"\n  },\n  \"frontend\": {\n    \"include\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Generate a project with backend only"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is a zip file', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                  "});",
+                  "",
+                  "pm.test('Content-Disposition header is present', function () {",
+                  "    pm.response.to.have.header('Content-Disposition');",
+                  "    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('TestBackendOnly.zip');",
+                  "});",
+                  "",
+                  "pm.test('Response body is not empty', function () {",
+                  "    pm.expect(pm.response.stream).to.have.property('length').above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate Frontend Only",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"TestFrontendOnly\"\n  },\n  \"backend\": {\n    \"include\": false\n  },\n  \"frontend\": {\n    \"include\": true,\n    \"projectName\": \"web-app\",\n    \"projectDescription\": \"Frontend Web Application\",\n    \"includeExamplePages\": true,\n    \"includeHusky\": false,\n    \"moduleSystem\": {\n      \"include\": false,\n      \"modules\": [],\n      \"features\": []\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Generate a project with frontend only"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is a zip file', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                  "});",
+                  "",
+                  "pm.test('Content-Disposition header is present', function () {",
+                  "    pm.response.to.have.header('Content-Disposition');",
+                  "    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('TestFrontendOnly.zip');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate Full Stack Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"FullStackProject\"\n  },\n  \"backend\": {\n    \"include\": true,\n    \"projectName\": \"backend\",\n    \"projectDescription\": \"Full Stack Backend Service\",\n    \"projectVersion\": \"2.0.0\",\n    \"dbHost\": \"postgres\",\n    \"dbPort\": 5432,\n    \"dbName\": \"fullstack_db\",\n    \"dbUser\": \"fullstack_user\",\n    \"dbPassword\": \"secure_password\",\n    \"pgAdminEmail\": \"admin@fullstack.com\",\n    \"pgAdminPassword\": \"admin789\",\n    \"debug\": false,\n    \"logLevel\": \"INFO\"\n  },\n  \"frontend\": {\n    \"include\": true,\n    \"projectName\": \"frontend\",\n    \"projectDescription\": \"Full Stack Frontend Application\",\n    \"includeExamplePages\": true,\n    \"includeHusky\": true,\n    \"moduleSystem\": {\n      \"include\": true,\n      \"modules\": [\n        {\n          \"id\": \"auth\",\n          \"name\": \"Authentication\",\n          \"permissions\": \"admin\"\n        },\n        {\n          \"id\": \"dashboard\",\n          \"name\": \"Dashboard\",\n          \"permissions\": \"user\"\n        }\n      ],\n      \"features\": [\n        {\n          \"id\": \"dark-mode\"\n        },\n        {\n          \"id\": \"notifications\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Generate a complete full-stack project"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is a zip file', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                  "});",
+                  "",
+                  "pm.test('Content-Disposition header is present', function () {",
+                  "    pm.response.to.have.header('Content-Disposition');",
+                  "    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('FullStackProject.zip');",
+                  "});",
+                  "",
+                  "pm.test('Response size is substantial for full stack', function () {",
+                  "    pm.expect(pm.response.stream).to.have.property('length').above(1000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "item": [
+        {
+          "name": "No Components Selected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"EmptyProject\"\n  },\n  \"backend\": {\n    \"include\": false\n  },\n  \"frontend\": {\n    \"include\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test error handling when no components are selected"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message is appropriate', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail).to.include('At least one part of the project');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"\"\n  },\n  \"backend\": {\n    \"include\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test validation error handling"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('Validation error details are present', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('detail');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Malformed JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"TestProject\"\n  },\n  \"backend\": {\n    \"include\": true,\n    \"invalidField\": \"shouldCauseValidation\"\n  }\n"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test malformed JSON handling"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Performance Tests",
+      "item": [
+        {
+          "name": "Large Project Generation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"LargeProjectWithManyModules\"\n  },\n  \"backend\": {\n    \"include\": true,\n    \"projectName\": \"large-backend\",\n    \"projectDescription\": \"Large Backend with Complex Configuration\",\n    \"projectVersion\": \"3.0.0\",\n    \"dbHost\": \"production-db\",\n    \"dbPort\": 5432,\n    \"dbName\": \"large_production_db\",\n    \"dbUser\": \"prod_user\",\n    \"dbPassword\": \"very_secure_password_123\",\n    \"pgAdminEmail\": \"admin@production.com\",\n    \"pgAdminPassword\": \"admin_secure_pass\",\n    \"debug\": false,\n    \"logLevel\": \"INFO\"\n  },\n  \"frontend\": {\n    \"include\": true,\n    \"projectName\": \"large-frontend\",\n    \"projectDescription\": \"Large Frontend with Many Features\",\n    \"includeExamplePages\": true,\n    \"includeHusky\": true,\n    \"moduleSystem\": {\n      \"include\": true,\n      \"modules\": [\n        {\n          \"id\": \"auth\",\n          \"name\": \"Authentication Module\",\n          \"permissions\": \"admin\"\n        },\n        {\n          \"id\": \"dashboard\",\n          \"name\": \"Dashboard Module\",\n          \"permissions\": \"user\"\n        },\n        {\n          \"id\": \"reports\",\n          \"name\": \"Reports Module\",\n          \"permissions\": \"manager\"\n        },\n        {\n          \"id\": \"settings\",\n          \"name\": \"Settings Module\",\n          \"permissions\": \"admin\"\n        },\n        {\n          \"id\": \"notifications\",\n          \"name\": \"Notifications Module\",\n          \"permissions\": \"user\"\n        }\n      ],\n      \"features\": [\n        {\n          \"id\": \"dark-mode\"\n        },\n        {\n          \"id\": \"real-time-updates\"\n        },\n        {\n          \"id\": \"advanced-search\"\n        },\n        {\n          \"id\": \"export-functionality\"\n        },\n        {\n          \"id\": \"multi-language\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test performance with a large, complex project configuration"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is reasonable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(30000); // 30 seconds",
+                  "});",
+                  "",
+                  "pm.test('Large zip file generated', function () {",
+                  "    pm.expect(pm.response.stream).to.have.property('length').above(5000);",
+                  "});",
+                  "",
+                  "pm.test('Content-Disposition header is correct', function () {",
+                  "    pm.response.to.have.header('Content-Disposition');",
+                  "    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('LargeProjectWithManyModules.zip');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Load Testing",
+      "item": [
+        {
+          "name": "Concurrent Requests",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"global\": {\n    \"projectName\": \"LoadTestProject{{$randomInt}}\"\n  },\n  \"backend\": {\n    \"include\": true,\n    \"projectName\": \"load-test-backend\",\n    \"projectDescription\": \"Load Test Backend\",\n    \"projectVersion\": \"1.0.0\",\n    \"dbHost\": \"localhost\",\n    \"dbPort\": 5432,\n    \"dbName\": \"load_test_db\",\n    \"dbUser\": \"load_user\",\n    \"dbPassword\": \"load_pass\",\n    \"pgAdminEmail\": \"admin@loadtest.com\",\n    \"pgAdminPassword\": \"admin123\",\n    \"debug\": false,\n    \"logLevel\": \"INFO\"\n  },\n  \"frontend\": {\n    \"include\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{current_base_url}}/api/generate",
+              "host": ["{{current_base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Test with random project names for load testing"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable under load', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000); // 15 seconds",
+                  "});",
+                  "",
+                  "pm.test('Zip file generated successfully', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
