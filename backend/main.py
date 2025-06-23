@@ -113,28 +113,37 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Enhanced CORS configuration for better localhost and production support
+allowed_origins = [
+    "https://vakac995.github.io",              # GitHub Pages main domain
+    "https://vakac995.github.io/easySH",       # GitHub Pages project path
+    "https://vakac995.github.io/easySH/",      # GitHub Pages project path with trailing slash
+]
+
+# For development, allow all localhost origins
+environment = os.getenv("ENVIRONMENT", "development").lower()
+if environment == "development":
+    # In development, be more permissive with localhost
+    allowed_origins.extend([
+        "http://localhost:5173",                   # Local development frontend
+        "http://127.0.0.1:5173",                   # Alternative local development
+        "http://localhost:3000",                   # Alternative local dev port
+        "http://127.0.0.1:3000",                   # Alternative local dev port
+        "http://localhost:8080",                   # Alternative local dev port
+        "http://127.0.0.1:8080",                   # Alternative local dev port
+        "http://localhost:4000",                   # Another common dev port
+        "http://127.0.0.1:4000",                   # Another common dev port
+    ])
+    # For development, also allow origin "*" to be more permissive
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://vakac995.github.io",          # GitHub Pages main domain
-        "https://vakac995.github.io/easySH",   # GitHub Pages project path
-        "http://localhost:5173",               # Local development frontend
-        "http://127.0.0.1:5173",              # Alternative local development
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Accept",
-        "Accept-Language", 
-        "Content-Language",
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "Origin",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers",
-    ],
-    expose_headers=["Content-Disposition"],
+    allow_origins=allowed_origins,
+    allow_credentials=False if "*" in allowed_origins else True,  # Can't use credentials with "*"
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+    allow_headers=["*"],  # Allow all headers in development
+    expose_headers=["Content-Disposition", "Content-Length"],
     max_age=86400,  # 24 hours
 )
 
@@ -318,3 +327,10 @@ def cors_test_options():
             "Access-Control-Max-Age": "86400",
         }
     )
+
+
+@app.get("/health", tags=["Health Check"])
+def health_check():
+    """Simple health check endpoint."""
+    logger.info("Health check endpoint called")
+    return {"status": "healthy", "service": "easySH-backend", "timestamp": "2025-06-23T00:00:00Z"}
