@@ -9,7 +9,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
-from fastapi.middleware.cors import CORSMiddleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -115,37 +114,55 @@ app = FastAPI(
 
 # Enhanced CORS configuration for better localhost and production support
 allowed_origins = [
-    "https://vakac995.github.io",              # GitHub Pages main domain
-    "https://vakac995.github.io/easySH",       # GitHub Pages project path
-    "https://vakac995.github.io/easySH/",      # GitHub Pages project path with trailing slash
+    "https://vakac995.github.io",  # GitHub Pages main domain
+    "https://vakac995.github.io/easySH",  # GitHub Pages project path
+    "https://vakac995.github.io/easySH/",  # GitHub Pages project path with trailing slash
 ]
 
 # For development, allow all localhost origins
 environment = os.getenv("ENVIRONMENT", "development").lower()
 if environment == "development":
     # In development, be more permissive with localhost
-    allowed_origins.extend([
-        "http://localhost:5173",                   # Local development frontend
-        "http://127.0.0.1:5173",                   # Alternative local development
-        "http://localhost:3000",                   # Alternative local dev port
-        "http://127.0.0.1:3000",                   # Alternative local dev port
-        "http://localhost:8080",                   # Alternative local dev port
-        "http://127.0.0.1:8080",                   # Alternative local dev port
-        "http://localhost:4000",                   # Another common dev port
-        "http://127.0.0.1:4000",                   # Another common dev port
-    ])
-    # For development, also allow origin "*" to be more permissive
-    allowed_origins = ["*"]
+    allowed_origins.extend(
+        [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+    )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False if "*" in allowed_origins else True,  # Can't use credentials with "*"
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["*"],  # Allow all headers in development
-    expose_headers=["Content-Disposition", "Content-Length"],
-    max_age=86400,  # 24 hours
-)
+# For Railway deployment, use Railway-compatible CORS headers
+# This works around potential conflicts with Railway's infrastructure CORS handling
+environment = os.getenv("ENVIRONMENT", "development").lower()
+
+# Temporarily disable standard CORS middleware and use custom Railway middleware
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=allowed_origins,
+#     allow_credentials=(
+#         False if "*" in allowed_origins else True
+#     ),  # Can't use credentials with "*"
+#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+#     allow_headers=["*"],  # Allow all headers in development
+#     expose_headers=["Content-Disposition", "Content-Length"],
+#     max_age=86400,  # 24 hours
+# )
+
+
+# Simple function to add Railway-compatible CORS headers
+def add_railway_cors_headers(response: Response) -> Response:
+    """Add Railway-compatible CORS headers to any response"""
+    response.headers["Access-Control-Allow-Origin"] = "https://railway.com"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "Accept, Accept-Language, Content-Language, Content-Type, "
+        "Authorization, X-Requested-With, Origin, Access-Control-Request-Method, "
+        "Access-Control-Request-Headers, Cache-Control, Pragma"
+    )
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition, Content-Length"
+    response.headers["Access-Control-Max-Age"] = "86400"
+    return response
+
 
 template_dir = Path(__file__).parent / "templates"
 jinja_env = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
@@ -227,9 +244,13 @@ async def generate_project(config: MasterConfig):
     Returns:
         StreamingResponse: A zip archive containing the generated project.
     """
-    logger.info(f"Received project generation request for: {config.global_config.projectName}")
-    logger.info(f"Backend included: {config.backend.include}, Frontend included: {config.frontend.include}")
-    
+    logger.info(
+        f"Received project generation request for: {config.global_config.projectName}"
+    )
+    logger.info(
+        f"Backend included: {config.backend.include}, Frontend included: {config.frontend.include}"
+    )
+
     if not config.backend.include and not config.frontend.include:
         raise HTTPException(
             status_code=400,
@@ -269,29 +290,24 @@ async def generate_project(config: MasterConfig):
     # Rewind buffer to the beginning
     zip_buffer.seek(0)
     zip_filename = f"{config.global_config.projectName}.zip"
-    headers = {
-        "Content-Disposition": f'attachment; filename="{zip_filename}"'
-    }
+    headers = {"Content-Disposition": f'attachment; filename="{zip_filename}"'}
 
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
 
 
 @app.options("/api/generate", tags=["Generation"])
-async def generate_project_options():
+async def generate_project_options() -> Response:
     """Handle CORS preflight requests for the generate endpoint."""
-    return Response(
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "*",  # FastAPI middleware will handle specific origins
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-            "Access-Control-Max-Age": "86400",
-        }
-    )
+    response = Response(status_code=200)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    response.headers["Access-Control-Max-Age"] = "86400"
+    return response
 
 
 @app.get("/", tags=["Health Check"])
-def read_root():
+def read_root() -> JSONResponse:
     """Provides a simple health check endpoint to confirm the API is running.
 
     Returns:
@@ -303,34 +319,44 @@ def read_root():
 
 
 @app.get("/api/cors-test", tags=["Health Check"])
-def cors_test():
+def cors_test() -> Response:
     """CORS test endpoint to verify cross-origin requests are working."""
     logger.info("CORS test endpoint called successfully")
-    return JSONResponse(
+    response = JSONResponse(
         content={
-            "status": "success", 
+            "status": "success",
             "message": "CORS is working correctly",
-            "timestamp": "2025-06-23T00:00:00Z"
+            "timestamp": "2025-06-23T00:00:00Z",
         }
     )
+    # Apply Railway-compatible CORS headers
+    return add_railway_cors_headers(response)
 
 
 @app.options("/api/cors-test", tags=["Health Check"])
-def cors_test_options():
+def cors_test_options() -> Response:
     """Handle CORS preflight requests for the CORS test endpoint."""
-    return Response(
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-            "Access-Control-Max-Age": "86400",
-        }
-    )
+    response = Response(status_code=200)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    response.headers["Access-Control-Max-Age"] = "86400"
+    return response
 
 
 @app.get("/health", tags=["Health Check"])
-def health_check():
+def health_check() -> Response:
     """Simple health check endpoint."""
     logger.info("Health check endpoint called")
-    return {"status": "healthy", "service": "easySH-backend", "timestamp": "2025-06-23T00:00:00Z"}
+    response = JSONResponse(
+        content={
+            "status": "healthy",
+            "service": "easySH-backend",
+            "timestamp": "2025-06-23T00:00:00Z",
+        }
+    )
+    # Apply Railway-compatible CORS headers
+    return add_railway_cors_headers(response)
+
+# Add Railway-specific CORS middleware - commented out for now, using function approach instead
+# app.add_middleware(RailwayCORSMiddleware)

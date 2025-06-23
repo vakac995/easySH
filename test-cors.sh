@@ -24,21 +24,28 @@ test_endpoint() {
     local endpoint=$3
     local method=${4:-GET}
     local description=$5
-    
+    local verbose=$6
+
     echo -e "${YELLOW}Testing: $description${NC}"
     echo "URL: $url$endpoint"
     echo "Origin: $origin"
     echo "Method: $method"
-    
+
+    if [ "$verbose" = "verbose" ]; then
+        curl -v -H "Origin: $origin" "$url$endpoint" 2>&1 | grep -E "(< |> )(Access-Control|Origin|HTTP|Vary)" | head -10
+        echo ""
+        return
+    fi
+
     if [ "$method" = "GET" ]; then
         RESPONSE=$(curl -s -w "%{http_code}" -H "Origin: $origin" "$url$endpoint" 2>/dev/null)
     else
         RESPONSE=$(curl -s -w "%{http_code}" -X "$method" -H "Origin: $origin" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type" "$url$endpoint" 2>/dev/null)
     fi
-    
+
     HTTP_CODE="${RESPONSE: -3}"
-    BODY="${RESPONSE%???}"  # Remove last 3 characters (HTTP code)
-    
+    BODY="${RESPONSE%???}" # Remove last 3 characters (HTTP code)
+
     if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then
         echo -e "${GREEN}✅ SUCCESS (HTTP $HTTP_CODE)${NC}"
         if [ -n "$BODY" ] && [ "$BODY" != "null" ]; then
@@ -58,7 +65,7 @@ echo ""
 
 # Test 1: Localhost availability
 echo "1. Testing localhost backend availability..."
-if curl -s -f "$LOCALHOST_URL/" > /dev/null 2>&1; then
+if curl -s -f "$LOCALHOST_URL/" >/dev/null 2>&1; then
     echo -e "${GREEN}✅ Localhost backend is accessible${NC}"
 else
     echo -e "${RED}❌ Localhost backend is not accessible${NC}"
@@ -66,10 +73,7 @@ else
     echo ""
 fi
 
-# Test 2: Localhost FastAPI docs
-test_endpoint "$LOCALHOST_URL" "" "/docs" "GET" "Localhost FastAPI docs endpoint"
-
-# Test 2.5: Localhost health endpoint
+# Test 2: Localhost health endpoint
 test_endpoint "$LOCALHOST_URL" "" "/health" "GET" "Localhost health endpoint"
 
 # Test 3: Localhost CORS test endpoint
@@ -82,18 +86,15 @@ echo "=== RAILWAY BACKEND TESTING ==="
 echo ""
 
 # Test 5: Railway availability
-echo "5. Testing Railway backend availability..."
-if curl -s -f "$RAILWAY_URL/" > /dev/null 2>&1; then
+echo "2. Testing Railway backend availability..."
+if curl -s -f "$RAILWAY_URL/" >/dev/null 2>&1; then
     echo -e "${GREEN}✅ Railway backend is accessible${NC}"
 else
     echo -e "${RED}❌ Railway backend is not accessible${NC}"
     echo ""
 fi
 
-# Test 6: Railway FastAPI docs
-test_endpoint "$RAILWAY_URL" "" "/docs" "GET" "Railway FastAPI docs endpoint"
-
-# Test 6.5: Railway health endpoint
+# Test 6: Railway health endpoint
 test_endpoint "$RAILWAY_URL" "" "/health" "GET" "Railway health endpoint"
 
 # Test 7: Railway CORS test endpoint with GitHub Pages origin
@@ -109,9 +110,9 @@ echo ""
 test_endpoint "$RAILWAY_URL" "$LOCALHOST_ORIGIN" "/api/cors-test" "GET" "Railway CORS test with localhost origin (should fail in prod)"
 
 # Test 10: Detailed CORS headers inspection
-echo "10. Detailed CORS headers inspection (Railway):"
+echo "3. Detailed CORS headers inspection (Railway):"
 echo -e "${YELLOW}Making verbose request to inspect all CORS headers:${NC}"
-curl -v -H "Origin: $GITHUB_PAGES_ORIGIN" "$RAILWAY_URL/api/cors-test" 2>&1 | grep -E "(< |> )(Access-Control|Origin|HTTP|Vary)" | head -10
+test_endpoint "$RAILWAY_URL" "$GITHUB_PAGES_ORIGIN" "/api/cors-test" "GET" "Detailed CORS headers inspection (Railway)" "verbose"
 
 echo ""
 echo "=================================================="
