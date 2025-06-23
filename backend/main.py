@@ -332,16 +332,17 @@ async def generate_project_options() -> Response:
 
 
 @app.get("/", tags=["Health Check"])
-def read_root() -> JSONResponse:
+def read_root() -> Response:
     """
     Root health check endpoint.
 
     Returns:
         JSON response indicating the API is running
     """
-    return JSONResponse(
+    response = JSONResponse(
         content={"status": "ok", "message": "Project Generation API is running."}
     )
+    return add_cors_headers(response)
 
 
 @app.get("/api/cors-test", tags=["Health Check"])
