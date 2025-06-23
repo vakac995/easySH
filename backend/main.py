@@ -113,9 +113,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Constants
+GITHUB_PAGES_ORIGIN = "https://vakac995.github.io"
+
 # CORS Configuration
 allowed_origins = [
-    "https://vakac995.github.io",  # GitHub Pages main domain
+    GITHUB_PAGES_ORIGIN,  # GitHub Pages main domain
     "https://vakac995.github.io/easySH",  # GitHub Pages project path
     "https://vakac995.github.io/easySH/",  # GitHub Pages project path with trailing slash
 ]
@@ -133,21 +136,27 @@ if environment == "development":
 
 # NOTE: Standard CORS middleware is disabled to avoid conflicts with Railway's infrastructure
 # Instead, we use explicit Railway-compatible headers on individual endpoints
-# Railway CORS Headers Function
-def add_railway_cors_headers(response: Response) -> Response:
+# Environment-aware CORS Headers Function
+def add_cors_headers(response: Response) -> Response:
     """
-    Apply Railway-compatible CORS headers to a response.
+    Apply environment-appropriate CORS headers to a response.
 
-    This function adds explicit CORS headers that align with Railway's infrastructure
-    to avoid conflicts with their built-in CORS handling.
+    For development: Allows localhost origins for local testing
+    For production: Uses Railway-compatible headers for deployed environment
 
     Args:
         response: The FastAPI Response object to modify
 
     Returns:
-        The response object with Railway-compatible CORS headers added
+        The response object with appropriate CORS headers added
     """
-    response.headers["Access-Control-Allow-Origin"] = "https://railway.com"
+    if environment == "development":
+        # Development: Allow localhost origins
+        response.headers["Access-Control-Allow-Origin"] = "*"
+    else:
+        # Production: Use Railway-compatible origin
+        response.headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
+
     response.headers["Access-Control-Allow-Methods"] = (
         "GET, POST, PUT, DELETE, OPTIONS, HEAD"
     )
@@ -288,12 +297,32 @@ async def generate_project(config: MasterConfig):
             raise HTTPException(
                 status_code=500,
                 detail="Failed to render setup_environment.sh",
-            )
-
-    # Rewind buffer to the beginning
+            )  # Rewind buffer to the beginning
     zip_buffer.seek(0)
     zip_filename = f"{config.global_config.projectName}.zip"
+
+    # Create headers with CORS support
     headers = {"Content-Disposition": f'attachment; filename="{zip_filename}"'}
+
+    # Add CORS headers for development vs production
+    if environment == "development":
+        headers["Access-Control-Allow-Origin"] = "*"
+    else:
+        headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
+
+    headers.update(
+        {
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": (
+                "Accept, Accept-Language, Content-Language, Content-Type, "
+                "Authorization, X-Requested-With, Origin, Access-Control-Request-Method, "
+                "Access-Control-Request-Headers, Cache-Control, Pragma"
+            ),
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Expose-Headers": "Content-Disposition, Content-Length",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
 
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
 
@@ -302,34 +331,30 @@ async def generate_project(config: MasterConfig):
 async def generate_project_options() -> Response:
     """Handle CORS preflight requests for the generate endpoint."""
     response = Response(status_code=200)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = (
-        "Content-Type, Authorization, X-Requested-With"
-    )
-    response.headers["Access-Control-Max-Age"] = "86400"
-    return response
+    return add_cors_headers(response)
 
 
 @app.get("/", tags=["Health Check"])
-def read_root() -> JSONResponse:
+def read_root() -> Response:
     """
     Root health check endpoint.
 
     Returns:
         JSON response indicating the API is running
     """
-    return JSONResponse(
+    response = JSONResponse(
         content={"status": "ok", "message": "Project Generation API is running."}
     )
+    return add_cors_headers(response)
 
 
 @app.get("/api/cors-test", tags=["Health Check"])
 def cors_test() -> Response:
-    """    CORS test endpoint with Railway-compatible headers.
+    """
+    CORS test endpoint with environment-appropriate headers.
 
     Returns:
-        JSON response with Railway CORS headers for cross-origin testing
+        JSON response with CORS headers for cross-origin testing
     """
     logger.info("CORS test endpoint called successfully")
     response = JSONResponse(
@@ -339,29 +364,23 @@ def cors_test() -> Response:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
-    return add_railway_cors_headers(response)
+    return add_cors_headers(response)
 
 
 @app.options("/api/cors-test", tags=["Health Check"])
 def cors_test_options() -> Response:
     """Handle CORS preflight requests for the CORS test endpoint."""
     response = Response(status_code=200)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = (
-        "Content-Type, Authorization, X-Requested-With"
-    )
-    response.headers["Access-Control-Max-Age"] = "86400"
-    return response
+    return add_cors_headers(response)
 
 
 @app.get("/health", tags=["Health Check"])
 def health_check() -> Response:
     """
-    Detailed health check endpoint with Railway CORS headers.
+    Detailed health check endpoint with environment-appropriate CORS headers.
 
     Returns:
-        JSON response with service status and Railway-compatible CORS headers
+        JSON response with service status and CORS headers
     """
     logger.info("Health check endpoint called")
     response = JSONResponse(
@@ -371,4 +390,4 @@ def health_check() -> Response:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
-    return add_railway_cors_headers(response)
+    return add_cors_headers(response)
