@@ -115,9 +115,11 @@ app = FastAPI(
 
 # Constants
 GITHUB_PAGES_ORIGIN = "https://vakac995.github.io"
+RAILWAY_ORIGIN = "https://railway.com"
 
 # CORS Configuration
 allowed_origins = [
+    RAILWAY_ORIGIN,  # Railway main domain
     GITHUB_PAGES_ORIGIN,  # GitHub Pages main domain
     "https://vakac995.github.io/easySH",  # GitHub Pages project path
     "https://vakac995.github.io/easySH/",  # GitHub Pages project path with trailing slash
@@ -155,7 +157,7 @@ def add_cors_headers(response: Response) -> Response:
         response.headers["Access-Control-Allow-Origin"] = "*"
     else:
         # Production: Use Railway-compatible origin
-        response.headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
+        response.headers["Access-Control-Allow-Origin"] = RAILWAY_ORIGIN
 
     response.headers["Access-Control-Allow-Methods"] = (
         "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -308,7 +310,7 @@ async def generate_project(config: MasterConfig):
     if environment == "development":
         headers["Access-Control-Allow-Origin"] = "*"
     else:
-        headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
+        headers["Access-Control-Allow-Origin"] = RAILWAY_ORIGIN
 
     headers.update(
         {
