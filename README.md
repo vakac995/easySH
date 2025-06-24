@@ -127,3 +127,17 @@ This project is designed for FiBank Bulgaria's internal use. See the [Developmen
 - **v1.0.0**: Initial release with core functionality
 
 See [Changelog](docs/06-fixes-and-improvements/changelog.md) for detailed version history.
+
+## Deployment
+
+### Backend (Port Forwarding)
+```bash
+./start_backend.sh
+```
+Then forward port 8000 in VS Code (Ports tab → Public).
+
+### Frontend (GitHub Pages)
+Set GitHub repository secret `VITE_API_BASE_URL_PROD` with your port forwarding URL.
+Deploy happens automatically on push to main.
+
+See [GitHub Secrets Setup](docs/05-development/github_secrets_setup_guide.md) for details.
