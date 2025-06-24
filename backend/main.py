@@ -132,8 +132,19 @@ if environment == "development":
         [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            # VS Code port forwarding URLs
+            "https://localhost:8000",
+            "https://127.0.0.1:8000",
         ]
     )
+
+# Add VS Code port forwarding support
+port_forwarding_url = os.getenv("VSCODE_PORT_FORWARDING_URL")
+if port_forwarding_url:
+    allowed_origins.append(port_forwarding_url)
+    allowed_origins.append(f"{port_forwarding_url}/")  # with trailing slash
 
 
 # NOTE: Standard CORS middleware is disabled to avoid conflicts with Railway's infrastructure
@@ -153,11 +164,11 @@ def add_cors_headers(response: Response) -> Response:
         The response object with appropriate CORS headers added
     """
     if environment == "development":
-        # Development: Allow localhost origins
+        # Development: Allow localhost origins and VS Code port forwarding
         response.headers["Access-Control-Allow-Origin"] = "*"
     else:
-        # Production: Use Railway-compatible origin
-        response.headers["Access-Control-Allow-Origin"] = RAILWAY_ORIGIN
+        # Production: For GitHub Pages deployment
+        response.headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
 
     response.headers["Access-Control-Allow-Methods"] = (
         "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -305,12 +316,11 @@ async def generate_project(config: MasterConfig):
 
     # Create headers with CORS support
     headers = {"Content-Disposition": f'attachment; filename="{zip_filename}"'}
-
     # Add CORS headers for development vs production
     if environment == "development":
         headers["Access-Control-Allow-Origin"] = "*"
     else:
-        headers["Access-Control-Allow-Origin"] = RAILWAY_ORIGIN
+        headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
 
     headers.update(
         {
