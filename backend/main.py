@@ -6,13 +6,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse, Response
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 from jinja2 import Environment, FileSystemLoader
+import traceback
+from typing import Callable, Any
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging with more detailed format
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -113,9 +118,40 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
+# Add request logging middleware
+@app.middleware("http")
+async def log_requests(
+    request: Request, call_next: Callable[[Request], Any]
+) -> Response:
+    """
+    Log all incoming HTTP requests to help debug Uvicorn warnings.
+    """
+    # Log basic request info
+    logger.info(f"🌐 {request.method} {request.url.path}")
+    logger.info(f"🔗 Origin: {request.headers.get('origin', 'No Origin')}")
+    logger.info(f"🖥️  User-Agent: {request.headers.get('user-agent', 'No User-Agent')}")
+    logger.info(
+        f"📄 Content-Type: {request.headers.get('content-type', 'No Content-Type')}"
+    )
+
+    # Log all headers for debugging
+    headers_dict = dict(request.headers)
+    logger.info(f"📋 All Headers: {headers_dict}")
+
+    try:
+        # Process the request
+        response = await call_next(request)
+        logger.info(f"✅ Response status: {response.status_code}")
+        return response
+    except Exception as e:
+        logger.error(f"❌ Request processing failed: {str(e)}")
+        raise
+
+
 # Constants
-GITHUB_PAGES_ORIGIN = "https://vakac995.github.io"
 RAILWAY_ORIGIN = "https://railway.com"
+GITHUB_PAGES_ORIGIN = "https://vakac995.github.io"
 
 # CORS Configuration
 allowed_origins = [
@@ -134,7 +170,6 @@ if environment == "development":
             "http://127.0.0.1:5173",
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            # VS Code port forwarding URLs
             "https://localhost:8000",
             "https://127.0.0.1:8000",
         ]
@@ -150,25 +185,39 @@ if port_forwarding_url:
 # NOTE: Standard CORS middleware is disabled to avoid conflicts with Railway's infrastructure
 # Instead, we use explicit Railway-compatible headers on individual endpoints
 # Environment-aware CORS Headers Function
-def add_cors_headers(response: Response) -> Response:
+def add_cors_headers(
+    response: Response, request_origin: Optional[str] = None
+) -> Response:
     """
     Apply environment-appropriate CORS headers to a response.
 
     For development: Allows localhost origins for local testing
-    For production: Uses Railway-compatible headers for deployed environment
+    For production: Uses GitHub Pages origins
 
     Args:
         response: The FastAPI Response object to modify
+        request_origin: The origin from the request headers
 
     Returns:
         The response object with appropriate CORS headers added
     """
-    if environment == "development":
-        # Development: Allow localhost origins and VS Code port forwarding
-        response.headers["Access-Control-Allow-Origin"] = "*"
+    # Production: Check if origin is from allowed GitHub Pages origins
+    github_origins = [
+        *allowed_origins,
+        "https://vakac995.github.io",
+        "https://vakac995.github.io/easySH",
+        "https://vakac995.github.io/easySH/",
+    ]
+    if request_origin and request_origin in github_origins:
+        response.headers["Access-Control-Allow-Origin"] = request_origin
     else:
-        # Production: For GitHub Pages deployment
         response.headers["Access-Control-Allow-Origin"] = GITHUB_PAGES_ORIGIN
+
+    if request_origin:
+        logger.info(f"🔍 CORS check - Request origin: {request_origin}")
+        logger.info(
+            f"✅ CORS response origin: {response.headers.get('Access-Control-Allow-Origin')}"
+        )
 
     response.headers["Access-Control-Allow-Methods"] = (
         "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -269,18 +318,29 @@ async def generate_project(config: MasterConfig):
         HTTPException: If neither backend nor frontend is included in the configuration
         HTTPException: If template rendering fails
     """
-    logger.info(
-        f"Received project generation request for: {config.global_config.projectName}"
-    )
-    logger.info(
-        f"Backend included: {config.backend.include}, Frontend included: {config.frontend.include}"
-    )
-
-    if not config.backend.include and not config.frontend.include:
-        raise HTTPException(
-            status_code=400,
-            detail="At least one part of the project (backend or frontend) must be included.",
+    try:
+        logger.info(
+            f"✅ Received project generation request for: {config.global_config.projectName}"
         )
+        logger.info(
+            f"Backend included: {config.backend.include}, Frontend included: {config.frontend.include}"
+        )
+
+        if not config.backend.include and not config.frontend.include:
+            logger.error(
+                "❌ Project generation failed: No backend or frontend selected"
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="At least one part of the project (backend or frontend) must be included.",
+            )
+
+    except Exception as e:
+        logger.error("❌ Project generation failed with error")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Error message: {str(e)}")
+        logger.error(f"Request data: {config.model_dump() if config else 'None'}")
+        raise
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
@@ -310,7 +370,11 @@ async def generate_project(config: MasterConfig):
             raise HTTPException(
                 status_code=500,
                 detail="Failed to render setup_environment.sh",
-            )  # Rewind buffer to the beginning
+            )
+
+    logger.info("✅ Project generation completed successfully")
+
+    # Rewind buffer to the beginning
     zip_buffer.seek(0)
     zip_filename = f"{config.global_config.projectName}.zip"
 
@@ -403,3 +467,69 @@ def health_check() -> Response:
         }
     )
     return add_cors_headers(response)
+
+
+# Global exception handler for validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Handle request validation errors with detailed logging.
+    """
+    logger.error("❌ Invalid HTTP request received")
+    logger.error(f"Request URL: {request.url}")
+    logger.error(f"Request method: {request.method}")
+    logger.error(f"Validation errors: {exc.errors()}")
+    logger.error("Request body validation failed")
+
+    # Log the full traceback for debugging
+    logger.error(f"Full error details: {str(exc)}")
+
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": "Invalid request format",
+            "errors": exc.errors(),
+            "message": "The request data does not match the expected format",
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """
+    Handle general exceptions with logging.
+    """
+    logger.error("❌ Unexpected error occurred")
+    logger.error(f"Request URL: {request.url}")
+    logger.error(f"Request method: {request.method}")
+    logger.error(f"Error type: {type(exc).__name__}")
+    logger.error(f"Error message: {str(exc)}")
+    logger.error(f"Traceback: {traceback.format_exc()}")
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error",
+            "message": "An unexpected error occurred while processing your request",
+        },
+    )
+
+
+@app.options("/{full_path:path}")
+async def options_handler(request: Request) -> Response:
+    """
+    Handle CORS preflight requests for any path.
+    This catches all OPTIONS requests that might be causing Uvicorn warnings.
+    """
+    origin = request.headers.get("origin")
+    logger.info(f"🔍 CORS preflight request to: {request.url.path}")
+    logger.info(f"🔗 Origin: {origin or 'No Origin'}")
+    logger.info(
+        f"🎯 Access-Control-Request-Method: {request.headers.get('access-control-request-method', 'None')}"
+    )
+    logger.info(
+        f"📋 Access-Control-Request-Headers: {request.headers.get('access-control-request-headers', 'None')}"
+    )
+
+    response = Response(status_code=200)
+    return add_cors_headers(response, origin)
